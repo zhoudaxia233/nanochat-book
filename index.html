@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
-  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}]});"></script>
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}]});"></script>
 
 <style>
 :root{
@@ -1837,7 +1837,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
 
   <p>这是一种"用一个数控制一切"的工程审美——你只需要决定"我要跑多深的模型"，其它都自动级联出合理值。这背后是大量的 scaling law 直觉。</p>
 
-  <p>speedrun 默认是 <code class="inl">d20</code>（约 5.6 亿参数），在 8×H100 上跑约 3-4 小时，云上租用 ~$100。这就是著名的 "$100 base model" 的来源。</p>
+  <p>speedrun 默认是 <code class="inl">d20</code>（约 5.6 亿参数），在 8×H100 上跑约 3-4 小时，云上租用 ~<span>$</span>100。这就是著名的 "<span>$</span>100 base model" 的来源。</p>
 
   <h3 class="section"><span class="sec-num">5.3</span>优化器：Muon + AdamW 的混搭</h3>
 
@@ -2282,7 +2282,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
 
   <h3 class="section"><span class="sec-num">11.4</span>报告（report.md）</h3>
 
-  <p>跑完 <code class="inl">speedrun.sh</code> 后，nanochat 会生成一份 <code class="inl">report.md</code>，把所有评估结果汇总成表格。Karpathy 在 demo 里展示过这份 report——这就是你跑出来的"$100 model"的成绩单。</p>
+  <p>跑完 <code class="inl">speedrun.sh</code> 后，nanochat 会生成一份 <code class="inl">report.md</code>，把所有评估结果汇总成表格。Karpathy 在 demo 里展示过这份 report——这就是你跑出来的"<span>$</span>100 model"的成绩单。</p>
 
   <div class="callout">
     <span class="label">读源码定位</span>
@@ -2304,7 +2304,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
 
   <h3 class="section"><span class="sec-num">12.1</span>最小可行环境</h3>
 
-  <p>nanochat 的"$100 speedrun"目标硬件是 8 × H100 80GB。在 RunPod / Lambda / Vast.ai 等云上租 ~$3/小时，跑 ~3-4 小时就能完成完整 pipeline。如果只有单卡：</p>
+  <p>nanochat 的"<span>$</span>100 speedrun"目标硬件是 8 × H100 80GB。在 RunPod / Lambda / Vast.ai 等云上租 ~<span>$</span>3/小时，跑 ~3-4 小时就能完成完整 pipeline。如果只有单卡：</p>
 
   <ul class="list">
     <li>单 H100 / A100 80GB：可以跑 <code class="inl">d20</code>，但训得慢，几十小时。</li>
