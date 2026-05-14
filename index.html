@@ -43,8 +43,11 @@
 }
 
 *{box-sizing:border-box}
-html,body{margin:0;padding:0}
-html{scroll-behavior:smooth}
+*, *::before, *::after{min-width:0}
+html,body{margin:0;padding:0;overflow-x:hidden;max-width:100%}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+img,svg,video,canvas,iframe{max-width:100%;height:auto}
+.svg-scroll{width:100%;display:block}
 body{
   background:var(--bg);
   color:var(--ink);
@@ -639,11 +642,132 @@ footer.colophon .seal-row span{
   border-radius: 50%;
 }
 
-/* Mobile tweaks */
-@media (max-width: 720px){
-  body{ font-size: 17px }
-  main.manuscript{ font-size: 1rem }
-  .pullquote{ font-size: 1.15rem; margin: 1.6rem 0 }
+/* ============ Responsive tweaks ============ */
+
+/* Tablet (≤ 900px) */
+@media (max-width: 900px){
+  .cover{ padding: 5vh 5vw 3vh; min-height: auto }
+  .cover-grid{ gap: 2rem }
+  .imprint{ margin-bottom: 1.4rem }
+  .cover-card{ padding: 1.6rem 1.4rem; box-shadow: 3px 4px 0 var(--rule-soft) }
+  .cover-footer{ font-size: 0.7rem; gap: 0.6rem; margin-top: 2.4rem }
+  .shell{ padding: 2.6rem 4vw 4rem }
+  main.manuscript{ font-size: 1rem; line-height: 1.78 }
+  section.chapter{ margin-bottom: 3.5rem }
+  hr.flourish{ margin: 1.8rem 0 }
+}
+
+/* Phone (≤ 600px) — main mobile tuning */
+@media (max-width: 600px){
+  body{ font-size: 16px; line-height: 1.75 }
+
+  /* Cover */
+  .cover{ padding: 4vh 5vw 2.5vh }
+  .imprint{ font-size: 0.7rem; letter-spacing: 0.08em; gap: 0.3rem }
+  .title{ font-size: clamp(2rem, 9vw, 2.6rem); line-height: 1.1; margin-bottom: 0.9rem }
+  .title .zh{ font-size: clamp(1.2rem, 5.4vw, 1.55rem); margin-top: 0.5rem }
+  .subtitle{ font-size: 0.98rem; margin-top: 1.1rem }
+  .byline{ font-size: 0.66rem; letter-spacing: 0.1em; margin-top: 1.4rem }
+  .cover-card{ padding: 1.1rem 1rem; font-size: 0.9rem }
+  .cover-card h3{ font-size: 1rem }
+  .cover-card ol li{ padding: 0.4rem 0; font-size: 0.92rem; gap: 0.6rem }
+  .cover-card ol li::before{ font-size: 0.7rem; min-width: 1.8em }
+  .cover-footer{ font-size: 0.62rem; margin-top: 1.8rem }
+
+  /* Reading shell */
+  .shell{ padding: 1.8rem 4vw 2.8rem }
+  main.manuscript{ font-size: 0.96rem; line-height: 1.75; max-width: 100% }
+
+  /* Chapter headings */
+  .chapter-head{ padding-bottom: 0.7rem; margin-bottom: 1.6rem }
+  .chapter-head .chapter-num{ font-size: 0.68rem; margin-bottom: 0.5rem }
+  .chapter-head h2{ font-size: clamp(1.5rem, 6vw, 1.9rem) }
+  .chapter-head h2 .zh{ font-size: 0.74em }
+  .chapter-head .kicker{ font-size: 0.93rem; margin-top: 0.5rem }
+
+  h3.section{ font-size: 1.18rem; margin: 1.8rem 0 0.6rem }
+  h3.section .sec-num{ font-size: 0.68rem }
+  h4.sub{ font-size: 1rem; margin: 1.2rem 0 0.4rem }
+
+  /* Body text */
+  p{ margin-bottom: 0.95rem }
+  section.chapter > p.opener::first-letter{
+    font-size: 3rem; padding: 0.25rem 0.45rem 0 0;
+  }
+
+  /* Pullquote: kill negative margin so it doesn't overhang */
+  .pullquote{
+    margin: 1.4rem 0;
+    padding: 0.9rem 1rem;
+    font-size: 1.05rem;
+    line-height: 1.45;
+  }
+
+  /* Callouts */
+  .callout{ padding: 0.85rem 1rem; font-size: 0.92rem; margin: 1.2rem 0 }
+  .callout .label{ font-size: 0.78rem }
+
+  /* Figures — make SVGs horizontally scrollable so labels stay legible */
+  figure.fig{ padding: 0.9rem 0.5rem 0.7rem; margin: 1.4rem 0; box-shadow: 2px 3px 0 var(--rule-soft) }
+  figure.fig figcaption{ font-size: 0.78rem; margin-top: 0.7rem; padding-top: 0.6rem }
+  .svg-scroll{
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -0.3rem;
+    padding: 0 0.3rem 0.3rem;
+  }
+  .svg-scroll::-webkit-scrollbar{ height: 4px }
+  .svg-scroll::-webkit-scrollbar-thumb{ background: var(--rule); border-radius: 2px }
+  figure.fig svg{ min-width: 540px; max-width: none; width: auto; margin: 0 }
+
+  /* Code blocks */
+  .code{ font-size: 0.74rem; margin: 1rem 0 1.2rem; box-shadow: 1px 2px 0 var(--rule-soft) }
+  .code pre{ padding: 0.8rem 0.9rem; line-height: 1.6 }
+  .code .label{ padding: 0.4rem 0.85rem; font-size: 0.62rem; letter-spacing: 0.05em }
+
+  /* Tables */
+  .table-wrap{ margin: 1.2rem 0 }
+  table.tbl{ font-size: 0.85rem }
+  table.tbl th, table.tbl td{ padding: 0.55rem 0.7rem }
+  table.tbl th{ font-size: 0.7rem; letter-spacing: 0.04em }
+
+  /* Parallel comparison cards */
+  .parallel{ gap: 0.7rem; margin: 1.1rem 0 }
+  .parallel .card{ padding: 0.85rem 0.95rem; font-size: 0.9rem }
+  .parallel .card h5{ font-size: 0.84rem }
+
+  /* Token row */
+  .token-row{ font-size: 0.76rem; gap: 3px }
+  .token-row .tk{ padding: 0.16rem 0.4rem }
+
+  /* Lists */
+  ul.list, ol.list{ padding-left: 1.2rem; margin: 0.7rem 0 1.2rem }
+  ul.list li, ol.list li{ margin-bottom: 0.35rem }
+
+  /* Inline code & links wrap long strings instead of overflowing */
+  p code, code.inl, a.link{ overflow-wrap: anywhere; word-break: break-word }
+
+  /* KaTeX display math allow horizontal scroll */
+  .katex-display{ padding: 0.5rem; margin: 1rem 0 !important; overflow-x: auto }
+  .katex-display::-webkit-scrollbar{ height: 4px }
+  .katex-display::-webkit-scrollbar-thumb{ background: var(--rule); border-radius: 2px }
+
+  /* Flourish dividers */
+  hr.flourish{ margin: 1.6rem 0 }
+
+  /* Colophon */
+  footer.colophon{ margin: 4rem auto 3rem; padding: 1.6rem 5vw; font-size: 0.88rem }
+}
+
+/* Very narrow (≤ 380px) */
+@media (max-width: 380px){
+  body{ font-size: 15px }
+  .title{ font-size: clamp(1.7rem, 9vw, 2.2rem) }
+  .title .zh{ font-size: clamp(1.05rem, 5vw, 1.35rem) }
+  .chapter-head h2{ font-size: 1.4rem }
+  h3.section{ font-size: 1.08rem }
+  .code{ font-size: 0.7rem }
+  figure.fig svg{ min-width: 460px }
 }
 
 /* Subtle hover on figures */
@@ -967,6 +1091,7 @@ figure.fig:hover{ box-shadow: 4px 7px 0 var(--rule-soft); transition: box-shadow
   <p>nanochat 完整复刻了如今大模型实践的标准链路。可以把它想象成一个串行的工厂：</p>
 
   <figure class="fig">
+    <div class="svg-scroll">
     <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ChatGPT-style pipeline">
       <defs>
         <marker id="arrow1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
@@ -1021,6 +1146,7 @@ figure.fig:hover{ box-shadow: 4px 7px 0 var(--rule-soft); transition: box-shadow
       </text>
       <text x="380" y="200" text-anchor="middle" class="num">DATA QUALITY ↑ · DATA QUANTITY ↓ · STEP COMPUTE ↓</text>
     </svg>
+    </div>
     <figcaption><span class="figref">FIG 1·1</span>五阶段从基模型到可用助手的递进过程，从左到右数据量递减、质量递增。</figcaption>
   </figure>
 
@@ -1098,6 +1224,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
   <p>nanochat 用的是<em>字节级 BPE</em>（byte-level BPE），即初始 alphabet 是 256 个字节，而不是字符——这样可以无损处理任何 UTF-8 输入，包括中文、emoji、奇怪符号，根本没有 OOV 的概念。GPT-2 起这就是事实标准。</p>
 
   <figure class="fig">
+    <div class="svg-scroll">
     <svg viewBox="0 0 700 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="BPE tokenization process">
       <style>
         .bx{ fill:#f6f0dc; stroke:#1a140b; stroke-width:1 }
@@ -1160,6 +1287,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
         <text x="270" y="18" class="lbl" style="font-size:13px">→ 4 个 token id</text>
       </g>
     </svg>
+    </div>
     <figcaption><span class="figref">FIG 2·1</span>"unbelievable" 在一个学到了 un/believ/ab/le 这些常见词缀词根的 BPE 分词器下被切成 4 个子词。</figcaption>
   </figure>
 
@@ -1289,6 +1417,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
   </ol>
 
   <figure class="fig">
+    <div class="svg-scroll">
     <svg viewBox="0 0 720 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Transformer block stack">
       <style>
         .bd{ fill:#fbf7ec; stroke:#1a140b; stroke-width:1.2 }
@@ -1357,6 +1486,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
         <text x="0" y="54" class="mn">loss   = CE(logits, next_ids)</text>
       </g>
     </svg>
+    </div>
     <figcaption><span class="figref">FIG 4·1</span>nanochat 的 decoder-only Transformer 总体视图。N 通常取 12 ~ 32。</figcaption>
   </figure>
 
@@ -1388,6 +1518,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
   <div class="pullquote">注意力机制 = 内容寻址的 key-value 字典 + 可微分的加权聚合。</div>
 
   <figure class="fig">
+    <div class="svg-scroll">
     <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="self-attention illustration">
       <style>
         .tk{ fill:#f6f0dc; stroke:#1a140b; stroke-width:1 }
@@ -1443,6 +1574,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
       <text x="40" y="240" class="lb">权重 α 由 softmax(QK<tspan baseline-shift="super" font-size="9">⊤</tspan>/√d) 给出</text>
       <text x="40" y="260" class="lb">输出 = Σⱼ αⱼ · V(token_j)</text>
     </svg>
+    </div>
     <figcaption><span class="figref">FIG 4·2</span>"fox" 这个 token 通过注意力从其它 token（尤其是 brown / jumps）那里聚合信息。曲线粗细对应 softmax 权重。</figcaption>
   </figure>
 
@@ -1533,6 +1665,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
   <p>语言模型在训练时不能"作弊"——预测位置 $t$ 的下一个 token 时，模型只能看 $x_1, \ldots, x_t$，不能偷看 $x_{t+1}$ 之后的东西。这个约束通过<em>因果掩码</em>实现：在算 softmax 之前，把注意力矩阵右上三角的位置全置为 $-\infty$，softmax 之后这些位置的权重就变成了 0。</p>
 
   <figure class="fig">
+    <div class="svg-scroll">
     <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="causal mask grid">
       <style>
         .ok{ fill:#f1ead7 }
@@ -1608,6 +1741,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
       </g>
       <text x="180" y="208" text-anchor="middle" class="lb">深色 = -∞，softmax 后为 0；浅色 = 允许 attend</text>
     </svg>
+    </div>
     <figcaption><span class="figref">FIG 4·3</span>Causal mask 把注意力矩阵限制为下三角，保证训练时不"穿越"看到未来 token。</figcaption>
   </figure>
 
@@ -2010,6 +2144,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
   <p>注意到一个事实：因果掩码意味着<em>位置 $t$ 的 K, V 一旦算出来，就永远不会再变</em>。新生成的 token 不会"反向修改"已有 token 的 K, V。所以我们可以把每一层的 K, V 缓存下来，下一步只算<em>新位置</em>的 Q, K, V，把新 Q 与<em>整张缓存里的 K</em>做注意力即可。</p>
 
   <figure class="fig">
+    <div class="svg-scroll">
     <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="KV cache visualization">
       <style>
         .cache{ fill:#f1ead7; stroke:#1a140b; stroke-width:1 }
@@ -2064,6 +2199,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
         <text x="0" y="104" class="mn">用 GQA 可减小一截</text>
       </g>
     </svg>
+    </div>
     <figcaption><span class="figref">FIG 10·1</span>KV cache 让 generation 从 O(T²) 降到 O(T)，代价是 KV 张量驻留显存。</figcaption>
   </figure>
 
