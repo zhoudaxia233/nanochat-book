@@ -1046,7 +1046,7 @@ figure.fig:hover{ box-shadow: 4px 7px 0 var(--rule-soft); transition: box-shadow
     <li>循环直到遇到 <code class="inl">&lt;|eos|&gt;</code> 或达到最大长度</li>
   </ol>
 
-  <p>这种"边生成边把自己输出再喂回去"的过程就叫 <em>autoregressive decoding</em>。它带来两个重要启示：</p>
+  <p>这种"边生成边把自己输出再喂回去"的过程就叫 <em>autoregressive decoding</em>。它带来两个重要推论：</p>
 
   <ul class="list">
     <li>训练可以并行（一次 forward 同时拿到所有位置的 loss），但<em>推理本质上是顺序的</em>——下一个 token 必须等上一个 token 生成完。</li>
@@ -1844,7 +1844,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
   <p>有个细节 CV 读者多半会觉得新鲜：nanochat 的优化器搭法。</p>
 
   <ul class="list">
-    <li><em>矩阵参数</em>（Linear 权重，shape ≥ 2D）走 <em>Muon</em>——专门给矩阵更新做正交化的优化器。每步把梯度过一道 Newton-Schulz 迭代，逼近"矩阵符号"操作，效果上等于沿所有奇异值方向都用差不多的步长更新。</li>
+    <li><em>所有矩阵参数</em>（Linear 权重，shape ≥ 2D）走 <em>Muon</em>——专门给矩阵更新做正交化的优化器。每步把梯度过一道 Newton-Schulz 迭代，逼近"矩阵符号"操作，效果上等于沿所有奇异值方向都用差不多的步长更新。</li>
     <li>其它参数（embeddings、biases、LayerNorm gain）继续走经典 <em>AdamW</em>。</li>
   </ul>
 
