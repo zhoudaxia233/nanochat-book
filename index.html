@@ -1019,13 +1019,13 @@ figure.fig:hover{ box-shadow: 4px 7px 0 var(--rule-soft); transition: box-shadow
 
   <p>设一段 token 序列为 $x_1, x_2, \ldots, x_T$，一个语言模型要学的就是联合概率 $p(x_1, \ldots, x_T)$。利用概率的链式法则，这件事可以写成：</p>
 
-  <p>$$ p(x_1, \ldots, x_T) \;=\; \prod_{t=1}^{T} p(x_t \mid x_{<t}) $$</p>
+  <p>$$ p(x_1, \ldots, x_T) \;=\; \prod_{t=1}^{T} p(x_t \mid x_{&lt;t}) $$</p>
 
-  <p>也就是说，<em>整段文本的概率 = 每一步在给定前面所有 token 的条件下，预测当前 token 的概率连乘</em>。神经网络要做的，就是把右边这一项 $p(x_t \mid x_{<t})$ 用一个参数化函数 $f_\theta$ 来逼近。</p>
+  <p>也就是说，<em>整段文本的概率 = 每一步在给定前面所有 token 的条件下，预测当前 token 的概率连乘</em>。神经网络要做的，就是把右边这一项 $p(x_t \mid x_{&lt;t})$ 用一个参数化函数 $f_\theta$ 来逼近。</p>
 
   <p>训练时的损失函数也就自然而然出来了：把所有训练序列的 log-likelihood 加起来取负，等价于在每个位置做一个分类问题，类别数等于词表大小 $|V|$，标签是下一个 token：</p>
 
-  <p>$$ \mathcal{L}(\theta) \;=\; -\sum_{t=1}^{T} \log p_\theta(x_t \mid x_{<t}) $$</p>
+  <p>$$ \mathcal{L}(\theta) \;=\; -\sum_{t=1}^{T} \log p_\theta(x_t \mid x_{&lt;t}) $$</p>
 
   <p>这就是<em>交叉熵</em>，在 PyTorch 里就是一行 <code class="inl">F.cross_entropy(logits, targets)</code>。</p>
 
@@ -2021,7 +2021,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
 
   <p>SFT 在数学上和 pretraining 几乎没差别：</p>
 
-  <p>$$ \mathcal{L}_{\text{SFT}}(\theta) \;=\; -\sum_{(q, a) \in \mathcal{D}_{\text{SFT}}} \sum_{t \in \text{assistant turns}} \log p_\theta(a_t \mid q, a_{<t}) $$</p>
+  <p>$$ \mathcal{L}_{\text{SFT}}(\theta) \;=\; -\sum_{(q, a) \in \mathcal{D}_{\text{SFT}}} \sum_{t \in \text{assistant turns}} \log p_\theta(a_t \mid q, a_{&lt;t}) $$</p>
 
   <p>$\mathcal{D}_{\text{SFT}}$ 是高质量对话数据集，loss 只在 assistant 段累加。<em>换了数据，没换损失</em>。这是 SFT 最重要的 mental model——它不是"另一种训练方式"，而是 pretraining 的延续，只是数据从"什么都吃"变成了"只吃好的"。</p>
 
