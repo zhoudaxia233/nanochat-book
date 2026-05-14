@@ -1,14 +1,15 @@
 # nanochat-book
 
+> **在线阅读 → <https://daxia.io/nanochat-book/>**
+
 一份为 CV / 视觉模型背景读者所写的 [`nanochat`](https://github.com/karpathy/nanochat) 中文深读手稿。
 
 从 **tokenization → pretraining → mid-training → SFT → RL → serving** 这条完整的现代 LLM 流水线，每一段都拆开来讲清楚——包括 Transformer 自注意力的数学与直觉、RoPE / RMSNorm / SwiGLU 这些"现代 LLM 标配件"、Muon + AdamW 的混搭优化器、GRPO 强化学习、KV cache 与采样策略，以及完整评估流程。
 
 ## 阅读
 
-打开 [`index.html`](./index.html) 即可，单文件自包含。字体走 Google Fonts，数学用 KaTeX (CDN)，图示均为内联 SVG。
-
-如果仓库启用了 GitHub Pages，也可以直接在浏览器里访问。
+- **在线**：<https://daxia.io/nanochat-book/>
+- **本地**：克隆仓库后直接在浏览器打开 [`index.html`](./index.html)。单文件自包含，字体走 Google Fonts，数学用 KaTeX (CDN)，图示均为内联 SVG。
 
 ## 章节
 
