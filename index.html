@@ -972,20 +972,20 @@ figure.fig:hover{ box-shadow: 4px 7px 0 var(--rule-soft); transition: box-shadow
     <p class="kicker">如果 nanoGPT 是"语言模型的 ResNet-18"，nanochat 就是"语言模型的全链路最小可运行系统"。</p>
   </div>
 
-  <p class="opener">nanochat 不是又一个开源大模型项目，而是 Karpathy 把"如何造一个 ChatGPT"这件事完整地、教学式地装进了一个仓库。它在 8000 行左右的 Python / Rust 代码里把整个链路打通：从 BPE 分词器开始，到在 FineWeb 上预训练一个 Llama 风格的 decoder-only Transformer，再到中训练、指令微调、（可选）强化学习，最后是一个跑得起来的 FastAPI 聊天前端。</p>
+  <p class="opener">nanochat 并不是又一个开源大模型项目，而是 Karpathy 把"如何造一个 ChatGPT"这件事原原本本、以教学的姿态塞进了一个仓库。整条链路用大约 8000 行 Python 与 Rust 跑通：从 BPE 分词器起步，到在 FineWeb 上预训练一个 Llama 风格的 decoder-only Transformer，再接上中训练、指令微调、（可选）强化学习，最后挂到一个能直接跑起来的 FastAPI 聊天前端。</p>
 
-  <p>这条链路上的每一段，都对应着工业级 LLM 的一个真实工程子系统。这意味着你读完之后获得的不是某个模型的特定知识，而是<em>整条流水线</em>的可迁移直觉。</p>
+  <p>链路上的每一环都对应着工业级 LLM 中一个真实的工程子系统。读完之后你拿到的不是某个具体模型的零碎知识，而是<em>整条流水线</em>的可迁移直觉。</p>
 
   <div class="callout analogy">
     <span class="label">CV ↔ NLP 类比</span>
-    <p>如果你做过 ImageNet 时代的 ResNet 训练：那时你也走过一条完整链路——准备 ImageNet，定义 ResNet 骨干，写训练循环跑 SGD，再做下游任务微调。nanochat 让你把这整套直觉<em>原样平移到语言模型</em>，并在新增的几个语言专属步骤（tokenizer / SFT / RL）上扩展认知。</p>
+    <p>做过 ImageNet 时代 ResNet 训练的人都熟悉那条完整链路：备好 ImageNet、搭起 ResNet 骨干、写好训练循环跑 SGD、再做下游微调。nanochat 让你把这套直觉<em>原样搬到语言模型上</em>，再在 tokenizer、SFT、RL 这几个语言专属的环节上补齐认知。</p>
   </div>
 
   <h3 class="section"><span class="sec-num">0.1</span>这本手稿怎么用</h3>
 
-  <p>我把内容按"由浅入深、随读随写代码"的方式组织。建议第一遍按章序通读，遇到不懂的数学符号不要纠结，先抓直觉；第二遍打开 nanochat 仓库逐文件对照；第三遍尝试用 <code class="inl">speedrun.sh</code> 跑一次最小训练，亲手验证每一步。</p>
+  <p>内容按"由浅入深、边读边写代码"组织。第一遍按章序通读即可，遇到不懂的数学符号别死磕，先抓直觉；第二遍打开 nanochat 仓库逐文件对照；第三遍用 <code class="inl">speedrun.sh</code> 跑一次最小训练，亲手把每一步走一遍。</p>
 
-  <p>每章末尾会给一组"读源码定位"，告诉你这一章涉及的内容在 nanochat 仓库里大致对应哪几个文件，方便你边读边查。</p>
+  <p>每章末尾都有一组"读源码定位"，告诉你这一章对应仓库里的哪几个文件，方便边读边查。</p>
 
   <h3 class="section"><span class="sec-num">0.2</span>你已经具备的与还需要补的</h3>
 
@@ -1000,7 +1000,7 @@ figure.fig:hover{ box-shadow: 4px 7px 0 var(--rule-soft); transition: box-shadow
     </div>
   </div>
 
-  <p>这本手稿就是来填这张"右栏清单"的。我会尽量在每个新概念出现时，写一个"从 CV 视角看是怎么回事"的脚注式段落。</p>
+  <p>这本手稿就是用来填这张"右栏清单"的。每出现一个新概念，我都会顺手写一段"从 CV 视角看是怎么回事"的小注脚。</p>
 </section>
 
 <hr class="flourish" />
@@ -1013,30 +1013,30 @@ figure.fig:hover{ box-shadow: 4px 7px 0 var(--rule-soft); transition: box-shadow
     <p class="kicker">在写下任何 Transformer 公式之前，先建立一个最小的概率心智模型。</p>
   </div>
 
-  <p class="opener">所有现代大语言模型，无论叫 GPT 还是 Llama 还是 nanochat，本质上都在学同一件事：<em>给定一段 token 序列，预测下一个 token 的概率分布</em>。听上去几乎是把一个超大号 n-gram 模型用神经网络重写了，但当你把"上下文"做到足够长、网络做到足够大、数据做到足够多之后，这件看起来简单的事就变成了"知识的隐式压缩"。</p>
+  <p class="opener">所有现代大语言模型——不管叫 GPT、Llama 还是 nanochat——骨子里都在学同一件事：<em>给定一段 token 序列，预测下一个 token 的概率分布</em>。听起来就像用神经网络重写一个超大号 n-gram 模型；可一旦上下文够长、网络够大、数据够多，这件看似朴素的事就变成了"知识的隐式压缩"。</p>
 
   <h3 class="section" id="s1-1"><span class="sec-num">1.1</span>什么是语言模型</h3>
 
-  <p>设一段 token 序列为 $x_1, x_2, \ldots, x_T$，一个语言模型要学的就是联合概率 $p(x_1, \ldots, x_T)$。利用概率的链式法则，这件事可以写成：</p>
+  <p>设一段 token 序列为 $x_1, x_2, \ldots, x_T$，语言模型要学的就是联合概率 $p(x_1, \ldots, x_T)$。按概率链式法则展开：</p>
 
   <p>$$ p(x_1, \ldots, x_T) \;=\; \prod_{t=1}^{T} p(x_t \mid x_{&lt;t}) $$</p>
 
-  <p>也就是说，<em>整段文本的概率 = 每一步在给定前面所有 token 的条件下，预测当前 token 的概率连乘</em>。神经网络要做的，就是把右边这一项 $p(x_t \mid x_{&lt;t})$ 用一个参数化函数 $f_\theta$ 来逼近。</p>
+  <p>换句话说，<em>整段文本的概率 = 每一步在前文条件下预测当前 token 的概率连乘</em>。神经网络要做的，就是用参数化函数 $f_\theta$ 去逼近右侧这一项 $p(x_t \mid x_{&lt;t})$。</p>
 
-  <p>训练时的损失函数也就自然而然出来了：把所有训练序列的 log-likelihood 加起来取负，等价于在每个位置做一个分类问题，类别数等于词表大小 $|V|$，标签是下一个 token：</p>
+  <p>训练损失也就自然落了出来：把所有训练序列的 log-likelihood 求和取负——等价于在每个位置做一次分类，类别数为词表大小 $|V|$，标签是下一个 token：</p>
 
   <p>$$ \mathcal{L}(\theta) \;=\; -\sum_{t=1}^{T} \log p_\theta(x_t \mid x_{&lt;t}) $$</p>
 
-  <p>这就是<em>交叉熵</em>，在 PyTorch 里就是一行 <code class="inl">F.cross_entropy(logits, targets)</code>。</p>
+  <p>这就是<em>交叉熵</em>，PyTorch 里一行 <code class="inl">F.cross_entropy(logits, targets)</code> 就搞定。</p>
 
   <div class="callout analogy">
     <span class="label">CV ↔ NLP 类比</span>
-    <p>ImageNet 上做分类时，对每张图像，模型输出 1000 个类别的概率，你用 cross-entropy 训。语言模型唯一的差别是：<em>每个序列位置都是一次分类</em>，类别数从 1000 变成了 ~50k 到 ~100k（词表大小）。每条 sequence 的有效"训练样本数"等于其长度。</p>
+    <p>在 ImageNet 上做分类时，每张图像由模型输出 1000 个类别的概率，再用 cross-entropy 训。语言模型唯一的不同是：<em>每个序列位置都是一次分类</em>，类别数从 1000 变成了 ~50k 到 ~100k（词表大小）。每条 sequence 的有效"训练样本数"等于它的长度。</p>
   </div>
 
   <h3 class="section" id="s1-2"><span class="sec-num">1.2</span>自回归生成（autoregressive generation）</h3>
 
-  <p>训练时的目标是"预测下一个 token"，那么推理时怎么生成长文本？很自然地——把模型自己预测出来的 token 加回到上下文里，再让它预测下一个：</p>
+  <p>训练目标是"预测下一个 token"，那推理时怎么生成长文本？做法很自然——把模型自己刚预测出来的 token 拼回上下文，再让它预测下一个：</p>
 
   <ol class="list">
     <li>输入 prompt：<code class="inl">[hello, world]</code></li>
@@ -1046,16 +1046,16 @@ figure.fig:hover{ box-shadow: 4px 7px 0 var(--rule-soft); transition: box-shadow
     <li>循环直到遇到 <code class="inl">&lt;|eos|&gt;</code> 或达到最大长度</li>
   </ol>
 
-  <p>这个"边生成边把自己输出再喂回去"的过程，就叫 <em>autoregressive decoding</em>。它带来两个重要后果：</p>
+  <p>这种"边生成边把自己输出再喂回去"的过程就叫 <em>autoregressive decoding</em>。它带来两个重要启示：</p>
 
   <ul class="list">
     <li>训练可以并行（一次 forward 同时拿到所有位置的 loss），但<em>推理本质上是顺序的</em>——下一个 token 必须等上一个 token 生成完。</li>
-    <li>因为推理时每多生成一个 token，上下文就长一格，朴素实现会重复计算前缀的注意力。这就引出 <em>KV cache</em>（见 §10）。</li>
+    <li>推理时每多生成一个 token 上下文就长一格，朴素实现会重复计算前缀的注意力——这就引出了 <em>KV cache</em>（见 §10）。</li>
   </ul>
 
   <h3 class="section" id="s1-3"><span class="sec-num">1.3</span>从 CV 到 NLP 的关键差异</h3>
 
-  <p>对一个 CV 背景的读者，下面这张对照表也许比任何一段散文都更有用。</p>
+  <p>对 CV 背景的读者，下面这张对照表也许比大段文字都更管用。</p>
 
   <div class="table-wrap">
     <table class="tbl">
@@ -1078,17 +1078,17 @@ figure.fig:hover{ box-shadow: 4px 7px 0 var(--rule-soft); transition: box-shadow
     </table>
   </div>
 
-  <p>有几个差异非常关键，值得多说两句：</p>
+  <p>其中有几条差异非常关键，值得多说两句：</p>
 
-  <p><strong>1. 输入是离散的。</strong> 这是 NLP 和 CV 最根本的分歧。像素是连续值，可以直接做 BN / 卷积；token 是符号，必须先经过一个 <em>embedding lookup</em>，把整数变成 D 维向量，才能进入神经网络。整个 token 表（"我们认识哪些子词"）是模型的一部分，与模型一起训练。</p>
+  <p><strong>1. 输入是离散的。</strong> 这是 NLP 和 CV 最根本的分歧。像素是连续值，可以直接做 BN 或卷积；token 是符号，必须先过一道 <em>embedding lookup</em>，把整数变成 D 维向量才能进网络。整张 token 表（"模型认识哪些子词"）本身就是模型的一部分，跟着模型一起训练。</p>
 
-  <p><strong>2. 监督信号是免费的。</strong> ImageNet 时代你得花钱标 1000 类标签；语言模型预训练完全不需要人工标注——只要给一段文本，"下一个词是什么"这个标签<em>就是文本自己</em>。这就是为什么 LLM 可以吃下整个互联网的数据，而 CV 不行。</p>
+  <p><strong>2. 监督信号是免费的。</strong> ImageNet 时代得花钱标 1000 类标签；语言模型预训练完全不需要人工标注——给一段文本，"下一个词是什么"这个标签<em>就藏在文本自己里</em>。这就是为什么 LLM 能吃下整个互联网的数据，而 CV 不行。</p>
 
-  <p><strong>3. 一个 forward 拿很多 loss。</strong> 在训练时，一段长度为 T 的序列经过一次 forward，可以同时拿到 T 个位置的 cross-entropy loss——它们共享了大量计算（除了最后的 head）。这让 LLM 训练的"每 FLOP 学到的信息量"对比 CV 高得离谱。</p>
+  <p><strong>3. 一个 forward 拿很多 loss。</strong> 训练时，长度为 T 的序列做一次 forward 就能同时拿到 T 个位置的 cross-entropy loss——它们共享了绝大部分计算（除了最后那个 head）。这让 LLM 训练的"每 FLOP 学到的信息量"比 CV 高得离谱。</p>
 
   <h3 class="section" id="s1-4"><span class="sec-num">1.4</span>ChatGPT 风格的五段式 pipeline</h3>
 
-  <p>nanochat 完整复刻了如今大模型实践的标准链路。可以把它想象成一个串行的工厂：</p>
+  <p>nanochat 完整复刻了当下大模型实践的标准链路。把它想象成一条串行的工厂流水线就行：</p>
 
   <figure class="fig">
     <div class="svg-scroll">
@@ -1153,18 +1153,18 @@ figure.fig:hover{ box-shadow: 4px 7px 0 var(--rule-soft); transition: box-shadow
   <p>每个阶段的本质：</p>
 
   <ul class="list">
-    <li><strong>Tokenize</strong>：把字符流转成 token id 流。一次性训完 BPE，之后整个 pipeline 都复用这一个 tokenizer。</li>
-    <li><strong>Pretrain</strong>：在海量无标签 web 文本上做下一词预测，让模型变成一个"什么都懂一点"的通用基模型 (<em>base model</em>)。</li>
-    <li><strong>Mid-training</strong>：在<em>少量但有结构</em>的数据上继续训，例如多轮对话格式 / 多选题 / 含工具调用的数学题，让模型学会"格式与角色"。</li>
+    <li><strong>Tokenize</strong>：把字符流转成 token id 流。BPE 一次性训完，整个 pipeline 后续都复用这一个 tokenizer。</li>
+    <li><strong>Pretrain</strong>：在海量无标签 web 文本上做下一词预测，把模型养成一个"什么都懂一点"的通用基模型 (<em>base model</em>)。</li>
+    <li><strong>Mid-training</strong>：在<em>少量但有结构</em>的数据上继续训，比如多轮对话格式、多选题、带工具调用的数学题，让模型学会"格式与角色"。</li>
     <li><strong>SFT</strong>：在精挑细选的高质量指令-回答对上做有监督微调，让模型学会"按助手的方式回答"。</li>
-    <li><strong>RL</strong>：用强化学习进一步把模型的行为推向某个可衡量的目标（在 nanochat 里是 GSM8K 上的答对率）。</li>
+    <li><strong>RL</strong>：用强化学习把模型的行为进一步往某个可衡量的目标上推（在 nanochat 里就是 GSM8K 答对率）。</li>
   </ul>
 
-  <p>有趣的是，"训练目标"在 1～4 阶段其实是<em>同一个 cross-entropy</em>，只是<em>数据变了</em>。直到 RL 才换成另一种目标。这一点在 §8 会再次强调。</p>
+  <p>有意思的是，1～4 阶段的"训练目标"其实都是<em>同一套 cross-entropy</em>，只是<em>数据变了</em>而已。直到 RL 才换成另一种目标。这一点 §8 还会再强调。</p>
 
   <div class="callout">
     <span class="label">读源码定位</span>
-    <p>整个 pipeline 的"指挥棒"是仓库根目录的 <code class="inl">speedrun.sh</code>：它按顺序调用 <code class="inl">scripts/tok_train.py</code>、<code class="inl">scripts/base_train.py</code>、<code class="inl">scripts/mid_train.py</code>、<code class="inl">scripts/chat_sft.py</code>、<code class="inl">scripts/chat_rl.py</code>、<code class="inl">scripts/chat_eval.py</code>，最后启动 <code class="inl">scripts/chat_web.py</code>。读完本手稿后，从 speedrun.sh 倒推任何一步都不难。</p>
+    <p>整条 pipeline 的"指挥棒"就是仓库根目录的 <code class="inl">speedrun.sh</code>：它按顺序调用 <code class="inl">scripts/tok_train.py</code>、<code class="inl">scripts/base_train.py</code>、<code class="inl">scripts/mid_train.py</code>、<code class="inl">scripts/chat_sft.py</code>、<code class="inl">scripts/chat_rl.py</code>、<code class="inl">scripts/chat_eval.py</code>，最后启动 <code class="inl">scripts/chat_web.py</code>。读完本手稿后，对照 speedrun.sh 倒推任何一步都不难。</p>
   </div>
 </section>
 
@@ -1178,32 +1178,32 @@ figure.fig:hover{ box-shadow: 4px 7px 0 var(--rule-soft); transition: box-shadow
     <p class="kicker">语言模型的"第零层"，决定了模型看到的世界。</p>
   </div>
 
-  <p class="opener">在做任何语言建模之前，我们必须先回答一个朴素的问题：模型的"输入单位"是什么？字符？单词？还是别的？这个选择听起来像工程细节，却深刻影响了模型的能力上限、词表大小、序列长度，乃至训练成本。nanochat 像几乎所有现代 LLM 一样，选了一个折中方案：<em>子词级 BPE</em>。</p>
+  <p class="opener">动手做语言建模之前，先得回答一个最朴素的问题：模型的"输入单位"是什么？字符？单词？还是别的？这看起来像个工程细节，却深刻影响着模型的能力上限、词表大小、序列长度乃至训练成本。nanochat 和几乎所有现代 LLM 一样，选了一条折中之路：<em>子词级 BPE</em>。</p>
 
   <h3 class="section" id="s2-1"><span class="sec-num">2.1</span>为什么不能直接喂字符或词</h3>
 
-  <p>设想两种极端的分词方式：</p>
+  <p>先设想两种极端的分词方式：</p>
 
-  <p><strong>方案 A：字符级。</strong> 词表只有几百个字符 (a-z, A-Z, 标点, 中文常用字…)，规则简单，覆盖所有可能。但代价是序列变得极长——"transformer" 这一个英文词就要占 11 个 token。Transformer 的注意力是 O(T²)，序列每变长一倍计算量变四倍，字符级让训练几乎不可行。</p>
+  <p><strong>方案 A：字符级。</strong> 词表只有几百个字符 (a-z、A-Z、标点、中文常用字……)，规则简单，覆盖一切。代价是序列被拉得极长——光"transformer"这一个英文词就占 11 个 token。Transformer 的注意力是 O(T²)，序列每变长一倍计算量翻四倍，字符级几乎让训练没法做。</p>
 
-  <p><strong>方案 B：词级。</strong> 把每个英文单词当一个 token，<code class="inl">"hello"</code> 就是一个 id。序列短，效率高，但词表会膨胀到几十万——"running"、"runs"、"ran" 都是不同 id，模型学不到它们的内在关联。更糟的是，遇到训练时没见过的词 (<em>OOV, out-of-vocabulary</em>)，模型只能丢一个 <code class="inl">&lt;unk&gt;</code>。</p>
+  <p><strong>方案 B：词级。</strong> 每个英文单词当一个 token，<code class="inl">"hello"</code> 就是一个 id。序列短、效率高，但词表会膨胀到几十万——"running"、"runs"、"ran"是三个不同 id，模型学不到它们的内在关联。更糟的是，碰到训练时没见过的词 (<em>OOV, out-of-vocabulary</em>)，模型只能丢一个 <code class="inl">&lt;unk&gt;</code> 出来。</p>
 
-  <p><strong>方案 C：子词级 (subword)。</strong> 折中之道。常见词保留为单个 token (<code class="inl">"the"</code>)，罕见词被切成若干高频子词的组合 (<code class="inl">"unbelievable"</code> → <code class="inl">"un"</code> + <code class="inl">"believ"</code> + <code class="inl">"able"</code>)。这样：</p>
+  <p><strong>方案 C：子词级 (subword)。</strong> 折中之道。常见词保留为单个 token (<code class="inl">"the"</code>)，罕见词被切成若干高频子词的组合 (<code class="inl">"unbelievable"</code> → <code class="inl">"un"</code> + <code class="inl">"believ"</code> + <code class="inl">"able"</code>)。这样做的好处是：</p>
 
   <ul class="list">
     <li>词表规模可控（典型 32k ~ 128k）。</li>
     <li>序列长度合理（一个英文词平均 ~1.3 个 token）。</li>
-    <li>不会有 OOV——最坏情况下退化到单字符。</li>
+    <li>没有 OOV——最坏情况退化到单字符。</li>
   </ul>
 
   <div class="callout analogy">
     <span class="label">CV ↔ NLP 类比</span>
-    <p>ViT 把图像切成 16×16 的 patch，每个 patch 经过一个线性层变成一个 D 维向量、形成一个 token 序列。子词分词在做几乎相同的事：把字符流切成"语言里的 patch"，每个 patch 再去查 embedding 得到向量。区别在于 NLP 的 patch 大小不固定，且 patch 是通过数据驱动统计得到的。</p>
+    <p>ViT 把图像切成 16×16 的 patch，每个 patch 过一道线性层变成一个 D 维向量，组成 token 序列。子词分词做的几乎是同一件事：把字符流切成"语言里的 patch"，每个 patch 再查 embedding 得到向量。区别在于 NLP 的 patch 大小不固定，而且这些 patch 是数据驱动地统计出来的。</p>
   </div>
 
   <h3 class="section" id="s2-2"><span class="sec-num">2.2</span>BPE：字节对编码的算法直觉</h3>
 
-  <p>BPE（Byte Pair Encoding）的算法非常朴素，几乎是儿童拼图：<em>反复合并语料里出现频率最高的相邻符号对</em>。下面是一个 toy 例子。假设语料只有以下三个词（每个字符之间留空，词尾加 <code class="inl">_</code>）：</p>
+  <p>BPE（Byte Pair Encoding）的算法朴素得像儿童拼图：<em>反复合并语料里出现频率最高的相邻符号对</em>。下面是一个 toy 例子。假设语料只有这三个词（字符之间留空，词尾加 <code class="inl">_</code>）：</p>
 
   <div class="code">
     <div class="label"><span>语料 / corpus</span><span class="tag">BPE 演示</span></div>
@@ -1213,15 +1213,15 @@ n e w e s t _ n e w e s t _ n e w e s t _ n e w e s t _ n e w e s t _ n e w e s 
 w i d e s t _ w i d e s t _ w i d e s t _</pre>
   </div>
 
-  <p>第一步：统计所有相邻字符对的出现频率。<code class="inl">("e","s")</code> 出现了 9 次（在 newest/widest 里），是最高频的。把它合并成一个新符号 <code class="inl">"es"</code>，加入词表，重新切分整个语料。</p>
+  <p>第一步：统计所有相邻字符对的出现频率。<code class="inl">("e","s")</code> 出现了 9 次（在 newest/widest 里），频率最高。把它合并成新符号 <code class="inl">"es"</code> 加入词表，再把语料整段重切一遍。</p>
 
-  <p>第二步：在新的语料里再次找最高频对。这次是 <code class="inl">("es","t")</code> → <code class="inl">"est"</code>。</p>
+  <p>第二步：在新语料里再找最高频的字符对。这一轮是 <code class="inl">("es","t")</code> → <code class="inl">"est"</code>。</p>
 
   <p>第三步：<code class="inl">("est","_")</code> → <code class="inl">"est_"</code>，因为很多词以 -est 结尾。</p>
 
-  <p>这样重复 N 步，词表大小就长成 (初始字符数) + N。每一步的"合并规则"按顺序记录下来。<em>编码新文本时，按规则顺序把字符流合并；解码时按 token id 查表拼接</em>。</p>
+  <p>这样重复 N 步，词表大小就长到 (初始字符数) + N。每一步的"合并规则"按顺序记录下来。<em>编码新文本时按规则顺序把字符流合并；解码时按 token id 查表拼接</em>。</p>
 
-  <p>nanochat 用的是<em>字节级 BPE</em>（byte-level BPE），即初始 alphabet 是 256 个字节，而不是字符——这样可以无损处理任何 UTF-8 输入，包括中文、emoji、奇怪符号，根本没有 OOV 的概念。GPT-2 起这就是事实标准。</p>
+  <p>nanochat 用的是<em>字节级 BPE</em>（byte-level BPE）：初始 alphabet 是 256 个字节而非字符——这样能无损处理任何 UTF-8 输入，包括中文、emoji、各种古怪符号，从根上就没有 OOV 这件事。从 GPT-2 起，这已是事实标准。</p>
 
   <figure class="fig">
     <div class="svg-scroll">
@@ -1293,11 +1293,11 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
 
   <h3 class="section" id="s2-3"><span class="sec-num">2.3</span>nanochat 的 rustbpe</h3>
 
-  <p>nanochat 把 BPE 训练这一步用 Rust 写了出来，放在 <code class="inl">rustbpe/</code> 目录。原因很直接：<em>训练 BPE 是个 CPU 密集型任务，Python 太慢</em>。一旦训完，导出来的合并规则与词表 (<code class="inl">tokenizer.pkl</code> / json) 就可以用任何语言加载。</p>
+  <p>nanochat 把 BPE 训练这一步用 Rust 写了出来，放在 <code class="inl">rustbpe/</code> 目录下。理由很直接：<em>训练 BPE 是 CPU 密集型任务，Python 太慢</em>。训完之后，导出的合并规则和词表 (<code class="inl">tokenizer.pkl</code> / json) 任何语言都能加载。</p>
 
-  <p>nanochat speedrun 默认词表大小约 <strong>65,536</strong>（即 2¹⁶）。这个数字不是凭空选的——它正好是一个 16-bit 无符号整数能表示的范围，对内存对齐和某些底层 kernel 友好。同时它也大到能让常见词独立成 token、小到不让 embedding 矩阵失控。</p>
+  <p>nanochat speedrun 默认词表大小约 <strong>65,536</strong>（即 2¹⁶）。这个数字不是随手挑的——它正好是 16-bit 无符号整数能表示的范围，对内存对齐和某些底层 kernel 友好。同时这个量级既大到能让常见词独立成 token、又小到不至于让 embedding 矩阵失控。</p>
 
-  <p>训练好的 tokenizer 暴露两个核心接口：</p>
+  <p>训练好的 tokenizer 对外暴露两个核心接口：</p>
 
   <div class="code">
     <div class="label"><span>nanochat/tokenizer.py · 概念性接口</span><span class="tag">python</span></div>
@@ -1317,9 +1317,9 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <span class="v">assistant_token_id</span>: <span class="t">int</span></pre>
   </div>
 
-  <p>除了普通的合并产生的子词，分词器还需要预留一些<em>特殊 token</em>，用来标记对话的开始、结束、用户角色、助手角色、工具调用等。它们不参与 BPE 合并，而是手工塞进词表，分配独立的 id。<em>这些特殊 token 就是 chat template 的基础，</em>到 §7 / §8 还会再见到它们。</p>
+  <p>除了合并出来的普通子词，分词器还要预留一批<em>特殊 token</em>，用来标记对话的开始、结束、用户角色、助手角色、工具调用等等。它们不参与 BPE 合并，而是手工塞进词表、分配独立 id。<em>这些特殊 token 就是 chat template 的基石，</em>§7 / §8 还会再见到它们。</p>
 
-  <p>一个被分词后的文本看上去就是这样：</p>
+  <p>分词后的文本大概长这样：</p>
 
   <p><strong>原文</strong>："The quick brown fox jumps."</p>
   <div class="token-row">
@@ -1330,16 +1330,16 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <span class="tk"> jumps<span class="tid">18045</span></span>
     <span class="tk">.<span class="tid">13</span></span>
   </div>
-  <p style="font-size:0.9em;color:var(--ink-mute)">注意：空格通常和后面的词合并在同一个 token 里——这是 GPT-2 风格 BPE 的惯例。token id 仅为示意，nanochat 实际数字会不同。</p>
+  <p style="font-size:0.9em;color:var(--ink-mute)">注意：空格通常会和后面的词并入同一个 token——这是 GPT-2 风格 BPE 的惯例。这里的 token id 仅作示意，nanochat 实际数字会不一样。</p>
 
   <div class="callout warn">
     <span class="label">注意</span>
-    <p>很多 LLM "失败案例"都源于 tokenizer：模型不会"数字母" (因为字母被合并了)；中文/代码的切分质量决定了模型在这两个域的上限；某些数字被切得乱七八糟，使算术题异常困难。Tokenizer 不只是工程细节，它<em>限定了模型能感知到的最小语义单位</em>。</p>
+    <p>LLM 的不少"失败案例"其实都出在 tokenizer 上：模型不会"数字母"（因为字母被合并了）；中文和代码的切分质量决定了模型在这两个域的上限；某些数字会被切得乱七八糟，让算术题异常难做。Tokenizer 不只是工程细节，它<em>划定了模型能感知到的最小语义单位</em>。</p>
   </div>
 
   <div class="callout">
     <span class="label">读源码定位</span>
-    <p><code class="inl">rustbpe/</code> 整个目录是用 Rust 写的训练实现；<code class="inl">nanochat/tokenizer.py</code> 提供 Python 侧 wrapper；<code class="inl">scripts/tok_train.py</code> 是训练入口。读一遍 <code class="inl">tok_train.py</code> 足以理解整个流程。</p>
+    <p><code class="inl">rustbpe/</code> 目录是 Rust 写的训练实现；<code class="inl">nanochat/tokenizer.py</code> 提供 Python 侧 wrapper；<code class="inl">scripts/tok_train.py</code> 是训练入口。把 <code class="inl">tok_train.py</code> 读一遍就够把整条流程串起来了。</p>
   </div>
 </section>
 
@@ -1353,43 +1353,43 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <p class="kicker">分词器把世界变成 id；嵌入层把 id 变回"有几何"的对象。</p>
   </div>
 
-  <p class="opener">假设我们已经把句子变成了一串 id：<code class="inl">[464, 2068, 7586, 21831, 18045, 13]</code>。但 Transformer 是连续函数，不能直接吃整数。中间需要一座桥——这座桥就是 <em>embedding 层</em>。</p>
+  <p class="opener">假设句子已经变成了一串 id：<code class="inl">[464, 2068, 7586, 21831, 18045, 13]</code>。可 Transformer 是连续函数，吃不下整数。中间需要一座桥——这座桥就是 <em>embedding 层</em>。</p>
 
   <h3 class="section"><span class="sec-num">3.1</span>嵌入层就是一张查找表</h3>
 
-  <p>本质上，embedding 层是一个形状为 <code class="inl">(|V|, D)</code> 的可训练矩阵 $E$。给定一个 token id $i$，它返回的就是矩阵的第 $i$ 行：</p>
+  <p>本质上，embedding 层就是一个形状为 <code class="inl">(|V|, D)</code> 的可训练矩阵 $E$。给定 token id $i$，它返回的就是矩阵的第 $i$ 行：</p>
 
   <p>$$ \text{embed}(i) \;=\; E_i \;\in\; \mathbb{R}^{D} $$</p>
 
-  <p>在 PyTorch 里就是一行 <code class="inl">nn.Embedding(vocab_size, n_embd)</code>。前向计算等价于 one-hot 乘以 $E$，但实现上当然不会真去做这个稠密乘法，而是直接 index。$E$ 与 Transformer 的其它参数一起被 SGD/AdamW 更新。</p>
+  <p>PyTorch 里就是一行 <code class="inl">nn.Embedding(vocab_size, n_embd)</code>。前向计算等价于用 one-hot 乘 $E$，但实现上当然不会真去做这个稠密乘法，而是直接 index。$E$ 跟 Transformer 的其它参数一起由 SGD/AdamW 更新。</p>
 
   <div class="callout analogy">
     <span class="label">CV ↔ NLP 类比</span>
-    <p>把 embedding 层想象成 CNN 的"第一层 + ReLU"。在 CV 里，第一层卷积把原始 RGB 变成几十个通道的特征图；在 NLP 里，embedding 把 token id 变成 D 维特征。区别在于第一层卷积"看了局部像素"，而 embedding "只看一个 id" ——上下文信息是后面的注意力层去抽取的。</p>
+    <p>把 embedding 层想象成 CNN 的"第一层 + ReLU"。CV 里第一层卷积把原始 RGB 变成几十个通道的特征图；NLP 里 embedding 把 token id 变成 D 维特征。差别在于第一层卷积"看到了局部像素"，而 embedding 只看一个 id——上下文信息留给后面的注意力层去抽取。</p>
   </div>
 
   <h3 class="section"><span class="sec-num">3.2</span>学到的空间结构</h3>
 
-  <p>训练好的 embedding 矩阵会展现出令人惊讶的几何结构。Word2Vec 时代的经典发现是：</p>
+  <p>训练好的 embedding 矩阵会展现出惊人的几何结构。Word2Vec 时代有一个经典发现：</p>
 
   <p>$$ E_{\text{king}} - E_{\text{man}} + E_{\text{woman}} \;\approx\; E_{\text{queen}} $$</p>
 
-  <p>这表明嵌入空间里的"方向"承载了语义关系（这里是性别方向）。现代 LLM 的 embedding 维度通常 D = 768 ~ 12288，能编码远比 Word2Vec 复杂的结构——但核心直觉仍然是：<em>相似的 token 在嵌入空间里位置相近，语义关系对应着方向</em>。</p>
+  <p>这说明嵌入空间里的"方向"是承载语义关系的（这里就是性别方向）。现代 LLM 的 embedding 维度通常 D = 768 ~ 12288，能编码远比 Word2Vec 复杂得多的结构——但核心直觉没变：<em>相似的 token 在嵌入空间里位置相近，语义关系对应着方向</em>。</p>
 
   <h3 class="section"><span class="sec-num">3.3</span>nanochat 的嵌入选择</h3>
 
-  <p>nanochat 在 GPT 类内部用了一个 <code class="inl">nn.Embedding(vocab_size, n_embd)</code> 来做 token embedding，并采用了一个常见小技巧：<em>tied input/output embedding</em>——把输入嵌入矩阵和最后预测层的权重共享 (或者强制共享转置)。这样：</p>
+  <p>nanochat 在 GPT 类内部用一个 <code class="inl">nn.Embedding(vocab_size, n_embd)</code> 来做 token embedding，并用了一个常见的小技巧：<em>tied input/output embedding</em>——输入嵌入矩阵和最后预测层的权重共享（或者强制共享转置）。好处有两点：</p>
 
   <ul class="list">
-    <li>参数减少一份 (~ vocab_size × D)，对小模型来说节省 10-20%。</li>
-    <li>逻辑上一致：把 id 映射到向量、和把向量映射回 id 用的是同一张"字典"。</li>
+    <li>少一份参数（~ vocab_size × D），对小模型能省 10-20%。</li>
+    <li>逻辑上自洽：把 id 映射到向量、把向量映射回 id，用的是同一张"字典"。</li>
   </ul>
 
-  <p>nanochat 没有显式的"绝对位置嵌入" (absolute positional embedding) ——它把位置信息延后到注意力层用 RoPE 注入，这一点 §4.4 详细说。</p>
+  <p>nanochat 没有显式的"绝对位置嵌入" (absolute positional embedding)——它把位置信息推迟到注意力层、用 RoPE 注入。这一点 §4.4 会详细讲。</p>
 
   <div class="callout">
     <span class="label">读源码定位</span>
-    <p><code class="inl">nanochat/gpt.py</code> 中 <code class="inl">GPT.__init__</code> 里的 <code class="inl">self.wte = nn.Embedding(...)</code>（wte = "word token embedding"，沿用了 GPT-2 的命名）。</p>
+    <p><code class="inl">nanochat/gpt.py</code> 中 <code class="inl">GPT.__init__</code> 里的 <code class="inl">self.wte = nn.Embedding(...)</code>（wte = "word token embedding"，沿用 GPT-2 的命名）。</p>
   </div>
 </section>
 
@@ -1403,17 +1403,17 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <p class="kicker">如果你只读一章，就读这一章。所有其它内容都是它的应用。</p>
   </div>
 
-  <p class="opener">从 2017 年的 "Attention Is All You Need" 到 2025 年的所有大模型，骨干都是 Transformer。但 nanochat 用的不是原论文那种 encoder-decoder 结构，而是当代 LLM 的标准选型：<em>decoder-only Transformer</em>，加 RoPE、RMSNorm、SwiGLU——可以把它看作 Llama 系列的简化版。本章会把这些零件拆开来讲清楚。</p>
+  <p class="opener">从 2017 年的 "Attention Is All You Need" 到 2025 年的所有大模型，骨干都是 Transformer。不过 nanochat 用的并不是原论文那种 encoder-decoder 结构，而是当代 LLM 的标准选型：<em>decoder-only Transformer</em>，配 RoPE、RMSNorm、SwiGLU——把它当作 Llama 系列的简化版就好。本章把这些零件一一拆开讲清楚。</p>
 
   <h3 class="section" id="s4-1"><span class="sec-num">4.1</span>整体视角：一台"信息精炼"流水线</h3>
 
   <p>从最高层往下看，一个 decoder-only Transformer 长这样：</p>
 
   <ol class="list">
-    <li>输入序列 <code class="inl">[id_1, id_2, ..., id_T]</code> 经过 embedding 得到 $X \in \mathbb{R}^{T \times D}$。</li>
-    <li>$X$ 依次经过 $N$ 个 <em>Transformer block</em>，每个 block 由"注意力 + FFN"两个子层组成，每个子层都带残差连接与归一化。</li>
+    <li>输入序列 <code class="inl">[id_1, id_2, ..., id_T]</code> 过一道 embedding 得到 $X \in \mathbb{R}^{T \times D}$。</li>
+    <li>$X$ 依次穿过 $N$ 个 <em>Transformer block</em>，每个 block 由"注意力 + FFN"两个子层组成，两个子层都带残差连接和归一化。</li>
     <li>最后用一个 LM head（线性层）把每个位置的 $D$ 维向量映射到 $|V|$ 维 logits。</li>
-    <li>对每个位置取 cross-entropy 与"下一个 token"对照，求和取均值，得到 loss。</li>
+    <li>每个位置和"下一个 token"做一次 cross-entropy，求和取均值就是 loss。</li>
   </ol>
 
   <figure class="fig">
@@ -1492,7 +1492,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
 
   <h3 class="section" id="s4-2"><span class="sec-num">4.2</span>自注意力（self-attention）：本章的灵魂</h3>
 
-  <p>注意力机制的核心隐喻：<em>每个 token 都是一名"读者"，它需要从序列里其它 token 那里"读"信息回来</em>。读什么、读多少，由它自己决定。我们用三组学到的投影来形式化这件事：</p>
+  <p>注意力机制的核心隐喻：<em>每个 token 都是一名"读者"，它要从序列中其它 token 那里"读"回信息</em>。读什么、读多少，由它自己说了算。形式化这件事用的是三组学到的投影：</p>
 
   <ul class="list">
     <li>$Q = X W_Q$（query，"我想要查询什么"）</li>
@@ -1504,16 +1504,16 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
 
   <p>$$ \text{Attention}(Q, K, V) \;=\; \text{softmax}\!\left( \frac{QK^\top}{\sqrt{d}} \right) V $$</p>
 
-  <p>逐步解读这个式子：</p>
+  <p>逐项拆开看：</p>
 
   <ol class="list">
-    <li>$QK^\top \in \mathbb{R}^{T \times T}$：第 $i$ 行第 $j$ 列等于 token $i$ 的 query 和 token $j$ 的 key 的点积——衡量 $i$ "想从" $j$ 那里读信息的强度。</li>
-    <li>除以 $\sqrt{d}$：缩放因子，防止点积随维度 $d$ 增大而方差爆炸，softmax 进入饱和。</li>
-    <li>softmax 沿"j 这一维"做归一化：每个 token 对所有源头的注意力权重加起来等于 1。</li>
-    <li>乘以 $V$：用这套权重对 value 加权求和，得到每个位置的新表示。</li>
+    <li>$QK^\top \in \mathbb{R}^{T \times T}$：第 $i$ 行第 $j$ 列就是 token $i$ 的 query 和 token $j$ 的 key 的点积——刻画 $i$ "想从" $j$ 那里读信息的强度。</li>
+    <li>除以 $\sqrt{d}$：缩放因子，防止点积方差随维度 $d$ 增大而爆炸、把 softmax 推进饱和区。</li>
+    <li>softmax 沿"j 这一维"归一化：每个 token 对所有源头的注意力权重相加为 1。</li>
+    <li>乘以 $V$：用这套权重对 value 加权求和，就得到每个位置的新表示。</li>
   </ol>
 
-  <p>整个操作可以读成一句话：<em>"对每个 token，把所有其它 token 的 value 按 (query·key) 的相似度做加权平均，得到它的新表示。"</em></p>
+  <p>整个操作一句话即可读完：<em>"对每个 token，把所有其它 token 的 value 按 (query·key) 的相似度加权平均，得到它的新表示。"</em></p>
 
   <div class="pullquote">注意力机制 = 内容寻址的 key-value 字典 + 可微分的加权聚合。</div>
 
@@ -1580,59 +1580,59 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
 
   <div class="callout analogy">
     <span class="label">CV ↔ NLP 类比</span>
-    <p>卷积是"<em>固定模板</em>下的加权聚合"——3×3 卷积核给每个邻居一组学到的、与位置绑定的权重，作用于<em>所有图像</em>。注意力是"<em>动态生成模板</em>下的加权聚合"——权重 $\alpha_{ij}$ 由 query 和 key 在当下样本里实时算出，作用于<em>这一具体序列</em>。这就是注意力比卷积更灵活也更费算力的原因。</p>
+    <p>卷积是"<em>固定模板</em>下的加权聚合"——3×3 卷积核给每个邻居一组学到的、与位置绑定的权重，作用于<em>所有图像</em>。注意力则是"<em>动态生成模板</em>下的加权聚合"——权重 $\alpha_{ij}$ 由 query 和 key 在当下样本里实时算出，只作用于<em>这一条具体的序列</em>。这就是注意力比卷积更灵活、也更费算力的根源。</p>
   </div>
 
-  <h3 class="section" id="s4-3"><span class="sec-num">4.3</span>Multi-Head Attention：多个视角并行</h3>
+  <h3 class="section" id="s4-3"><span class="sec-num">4.3</span>Multi-Head Attention：多视角并行</h3>
 
-  <p>用一组 $W_Q, W_K, W_V$ 只能学到一种"查询风格"。MultiHead 的想法是同时用 $h$ 组独立的 $(W_Q^{(i)}, W_K^{(i)}, W_V^{(i)})$，每一组都在<em>更小的</em>维度 $d_h = D / h$ 上做自己的注意力，最后把 $h$ 个输出拼起来再投影回 $D$ 维。</p>
+  <p>一组 $W_Q, W_K, W_V$ 只能学到一种"查询风格"。MultiHead 的思路是同时用 $h$ 组独立的 $(W_Q^{(i)}, W_K^{(i)}, W_V^{(i)})$，每一组都在<em>更小的</em>维度 $d_h = D / h$ 上做自己的注意力，最后把 $h$ 个输出拼起来再投影回 $D$ 维。</p>
 
   <p>$$ \text{MultiHead}(X) = \text{Concat}(h_1, \ldots, h_H) W_O, \qquad h_i = \text{Attention}(X W_Q^{(i)}, X W_K^{(i)}, X W_V^{(i)}) $$</p>
 
-  <p>实现上当然不会真去搞 $h$ 个独立矩阵——而是把 $W_Q, W_K, W_V$ 直接做成 $D \to D$，然后 reshape 成 $(B, T, H, d_h)$，再做注意力。代码层面上 multi-head 几乎和 single-head 一样简洁。</p>
+  <p>当然实现上不会真去开 $h$ 个独立矩阵——而是把 $W_Q, W_K, W_V$ 直接做成 $D \to D$，再 reshape 成 $(B, T, H, d_h)$ 去做注意力。代码层面，multi-head 跟 single-head 几乎一样简洁。</p>
 
-  <p>nanochat 还可能用了一个叫 <em>GQA (Grouped-Query Attention)</em> 的变体——多个 Q head 共享同一组 K/V head，能在几乎不损害质量的情况下大幅减少 KV cache 的内存占用。这对小模型省内存很有用。</p>
+  <p>nanochat 还可能用了一个叫 <em>GQA (Grouped-Query Attention)</em> 的变体——多个 Q head 共享同一组 K/V head，能在几乎不掉点的情况下大幅压低 KV cache 的内存占用。这对小模型省内存非常有用。</p>
 
   <h3 class="section" id="s4-4"><span class="sec-num">4.4</span>位置编码：RoPE</h3>
 
-  <p>注意力机制本身对 token 的<em>顺序</em>是不敏感的——把输入打乱再算注意力，得到的输出也只是被同样地打乱。这显然不对，"狗咬人"和"人咬狗"差别巨大。所以我们必须把位置信息<em>显式注入</em>。</p>
+  <p>注意力机制本身对 token 的<em>顺序</em>是无感的——把输入打乱再算注意力，输出也只是被同样地打乱。这显然不行，"狗咬人"和"人咬狗"差别巨大。所以位置信息必须<em>显式注入</em>。</p>
 
-  <p>原始 Transformer 用的是绝对位置嵌入：给每个位置 $t$ 一个独立的 $D$ 维向量 $P_t$，与 token embedding 相加。简单但有问题——它对外推到训练时没见过的长度不友好。</p>
+  <p>原始 Transformer 用的是绝对位置嵌入：每个位置 $t$ 配一个独立的 $D$ 维向量 $P_t$，与 token embedding 相加。简单但有毛病——外推到训练时没见过的长度时不友好。</p>
 
-  <p>nanochat 用的是 <em>RoPE (Rotary Position Embedding)</em>，目前是开源 LLM 的事实标准。RoPE 的思路精妙：</p>
+  <p>nanochat 用的是 <em>RoPE (Rotary Position Embedding)</em>，如今已是开源 LLM 的事实标准。RoPE 的思路相当精妙：</p>
 
   <ol class="list">
-    <li>不再"加"位置向量到 embedding 上，而是把位置信息<em>编码成对 Q, K 的旋转</em>。</li>
-    <li>对每一对维度 (2k, 2k+1)，把它们看作复平面上的一个二维向量，按角度 $\theta_t = t \cdot \omega_k$ 旋转，其中 $\omega_k = 10000^{-2k/d}$ 是该维度的"频率"。</li>
-    <li>关键性质：两个被旋转过的 query 和 key 做点积时，结果只依赖于<em>相对位置</em> $t_q - t_k$，不依赖绝对位置。</li>
+    <li>不再把位置向量"加"到 embedding 上，而是把位置信息<em>编码成对 Q、K 的旋转</em>。</li>
+    <li>对每一对维度 (2k, 2k+1)，把它们看成复平面上的一个二维向量，按角度 $\theta_t = t \cdot \omega_k$ 做旋转，其中 $\omega_k = 10000^{-2k/d}$ 是该维度的"频率"。</li>
+    <li>关键性质：旋转过的 query 和 key 做点积时，结果只依赖<em>相对位置</em> $t_q - t_k$，与绝对位置无关。</li>
   </ol>
 
   <p>$$ \langle \text{RoPE}_{t_q}(q), \text{RoPE}_{t_k}(k) \rangle \;=\; f(q, k, t_q - t_k) $$</p>
 
-  <p>这两点带来的好处：</p>
+  <p>由此带来的好处：</p>
 
   <ul class="list">
-    <li><strong>相对性</strong>：模型学到的是"距离 5 个 token 的关系"，而不是"绝对位置 173"。语义自然。</li>
-    <li><strong>外推性</strong>：训练时见过最长 2048，推理时可以适度推到 4096 而不立刻崩。配合一些 trick (NTK-aware、YaRN) 可以推得更远。</li>
-    <li><strong>实现简洁</strong>：只在 attention 之前对 Q 和 K 做一次"旋转"操作即可，不动 V，不动其它任何东西。</li>
+    <li><strong>相对性</strong>：模型学到的是"距离 5 个 token 的关系"，而非"绝对位置 173"。语义更自然。</li>
+    <li><strong>外推性</strong>：训练时最长见过 2048，推理时适度推到 4096 也不会立刻崩；配合 NTK-aware、YaRN 这类 trick 还能推得更远。</li>
+    <li><strong>实现简洁</strong>：只需在 attention 之前给 Q 和 K 做一次"旋转"，V 不动、其它任何东西也不动。</li>
   </ul>
 
   <div class="callout">
     <span class="label">注意</span>
-    <p>RoPE 不是"加在 embedding 上"的位置嵌入。它<em>只对每个 attention 层的 Q 和 K 起作用</em>。模型的 embedding 矩阵<em>不</em>包含位置信息——这是为什么 §3 里我们看到 nanochat 没有显式的 positional embedding 层。</p>
+    <p>RoPE 不是"加在 embedding 上"的位置嵌入。它<em>只在每个 attention 层对 Q 和 K 起作用</em>。模型的 embedding 矩阵<em>本身</em>不带位置信息——这就是 §3 里 nanochat 没有显式 positional embedding 层的原因。</p>
   </div>
 
   <h3 class="section" id="s4-5"><span class="sec-num">4.5</span>FFN / SwiGLU：每个 token 的独立深加工</h3>
 
-  <p>注意力子层让 token 之间互相"通信"，FFN 子层让每个 token 在自己的位置上做<em>深加工</em>。它就是一个对每个位置独立应用的 MLP：</p>
+  <p>注意力子层让 token 之间彼此"通信"，FFN 子层则让每个 token 在自己的位置上做<em>深加工</em>。它就是对每个位置独立应用的一个 MLP：</p>
 
   <p>$$ \text{FFN}(x) \;=\; W_2 \cdot \sigma\!\left( W_1 \cdot x \right) $$</p>
 
-  <p>原始 Transformer 用 ReLU，后来主流换成了 GeLU。<em>现代 LLM（包括 nanochat）通常用 SwiGLU</em>——它本质上是一个"双线性 + 门控"的结构：</p>
+  <p>原始 Transformer 用 ReLU，后来主流换成了 GeLU。<em>现代 LLM（包括 nanochat）通常用 SwiGLU</em>——一种"双线性 + 门控"的结构：</p>
 
   <p>$$ \text{SwiGLU}(x) \;=\; W_2 \cdot \big( \text{SiLU}(W_g \cdot x) \;\odot\; (W_1 \cdot x) \big) $$</p>
 
-  <p>这里 $\odot$ 是逐元素相乘，$\text{SiLU}(x) = x \cdot \sigma(x)$ 是 swish 激活函数。SwiGLU 比 ReLU/GeLU 在等参条件下普遍涨点 0.5～1.5 个 perplexity。代价是多了一份 $W_g$ 矩阵，参数量略增——所以 hidden 维度通常会从 4D 降到 ~2.67D 来保持参数相当。</p>
+  <p>这里 $\odot$ 是逐元素相乘，$\text{SiLU}(x) = x \cdot \sigma(x)$ 就是 swish 激活函数。等参条件下，SwiGLU 比 ReLU/GeLU 普遍能涨 0.5～1.5 个 perplexity 的点。代价是多了一份 $W_g$ 矩阵，参数量略增——所以 hidden 维度通常从 4D 降到 ~2.67D 来抵销。</p>
 
   <h3 class="section" id="s4-6"><span class="sec-num">4.6</span>RMSNorm：LayerNorm 的极简变体</h3>
 
@@ -1640,29 +1640,29 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
 
   <p>$$ \text{LN}(x) \;=\; \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} \cdot \gamma + \beta $$</p>
 
-  <p>需要计算均值 $\mu$、方差 $\sigma^2$，并维护可学的缩放 $\gamma$ 和偏移 $\beta$。RMSNorm 把它简化为只用 RMS（root mean square）做缩放，去掉均值与偏移：</p>
+  <p>既要算均值 $\mu$ 和方差 $\sigma^2$，又要维护可学的缩放 $\gamma$ 与偏移 $\beta$。RMSNorm 把它精简成只用 RMS（root mean square）做缩放，去掉均值和偏移：</p>
 
   <p>$$ \text{RMSNorm}(x) \;=\; \frac{x}{\sqrt{\frac{1}{D}\sum_i x_i^2 + \epsilon}} \cdot \gamma $$</p>
 
-  <p>实证上，RMSNorm 在 LLM 训练中和 LayerNorm 几乎等效，但<em>更快、更省内存</em>，所以成了主流。nanochat 也采用 RMSNorm。</p>
+  <p>实证上，RMSNorm 在 LLM 训练里和 LayerNorm 几乎等效，但<em>更快、更省内存</em>，于是成了主流。nanochat 也用 RMSNorm。</p>
 
-  <p>另外一个微小但重要的选择：nanochat 用 <em>pre-norm</em>（在每个子层<em>之前</em>做 RMSNorm）而不是 post-norm。pre-norm 让残差流的尺度保持稳定，训练 deep transformer 时更稳定。</p>
+  <p>还有一个微小但重要的选择：nanochat 用 <em>pre-norm</em>（在每个子层<em>之前</em>做 RMSNorm）而不是 post-norm。pre-norm 让残差流的尺度保持稳定，训练深层 transformer 时更稳。</p>
 
   <h3 class="section" id="s4-7"><span class="sec-num">4.7</span>残差流（residual stream）视角</h3>
 
-  <p>把整个 Transformer 看作"一条主干道 + 沿途的若干读写者"，会让很多事情变得清晰。这种视角来自 Anthropic 的可解释性研究——把 token 在网络里的表示 $x$ 看作一条<em>残差流</em>：</p>
+  <p>把整个 Transformer 想成"一条主干道 + 沿途的一群读写者"，很多事情就豁然开朗。这种视角来自 Anthropic 的可解释性研究——把 token 在网络里的表示 $x$ 视作一条<em>残差流</em>：</p>
 
   <ul class="list">
-    <li>每一层的注意力子层从残差流里 <em>read</em> 信息（通过 Q/K/V 计算），并把结果 <em>write back</em> 到残差流（残差加法）。</li>
+    <li>每一层的注意力子层从残差流里 <em>read</em> 信息（通过 Q/K/V 计算），再把结果 <em>write back</em> 到残差流（残差加法）。</li>
     <li>每一层的 FFN 子层同样 read-then-write。</li>
-    <li>残差流的"维度"$D$ 是固定的；每个子层向其中加一个增量。</li>
+    <li>残差流的"维度"$D$ 始终不变，每个子层往里叠加一个增量。</li>
   </ul>
 
-  <p>这个视角的力量在于：它把"参数学的是什么"和"信息流是什么"分开了。某个 attention head 学到的，其实是<em>从残差流的哪个子空间读、把结果写到哪个子空间</em>。一旦你接受这个视角，"为什么用残差连接"、"为什么 layer norm 放在 pre-norm 位置"这些工程选择就变得理所当然。</p>
+  <p>这个视角的厉害之处在于：它把"参数学的是什么"和"信息流是什么"分开了。某个 attention head 真正学到的，其实是<em>从残差流的哪个子空间读、再把结果写到哪个子空间</em>。一旦接受这个视角，"为什么要用残差连接"、"为什么 layer norm 要放在 pre-norm 位置"这些工程选择就都顺理成章了。</p>
 
   <h3 class="section" id="s4-8"><span class="sec-num">4.8</span>因果掩码（causal mask）</h3>
 
-  <p>语言模型在训练时不能"作弊"——预测位置 $t$ 的下一个 token 时，模型只能看 $x_1, \ldots, x_t$，不能偷看 $x_{t+1}$ 之后的东西。这个约束通过<em>因果掩码</em>实现：在算 softmax 之前，把注意力矩阵右上三角的位置全置为 $-\infty$，softmax 之后这些位置的权重就变成了 0。</p>
+  <p>语言模型训练时不能"作弊"——预测位置 $t$ 的下一个 token 时，模型只能看 $x_1, \ldots, x_t$，不能偷看 $x_{t+1}$ 之后的内容。这个约束靠<em>因果掩码</em>实现：在算 softmax 之前，把注意力矩阵右上三角的位置全置成 $-\infty$，softmax 之后这些位置的权重自然就成了 0。</p>
 
   <figure class="fig">
     <div class="svg-scroll">
@@ -1745,11 +1745,11 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <figcaption><span class="figref">FIG 4·3</span>Causal mask 把注意力矩阵限制为下三角，保证训练时不"穿越"看到未来 token。</figcaption>
   </figure>
 
-  <p>这一步在 PyTorch 里就是一行 <code class="inl">scores.masked_fill(mask, -inf)</code>；用 <code class="inl">F.scaled_dot_product_attention(..., is_causal=True)</code> 还能自动用 FlashAttention 优化掉 O(T²) 的内存开销。nanochat 利用了 PyTorch 的 SDPA，吃满 H100 的算力。</p>
+  <p>PyTorch 里这一步就是一行 <code class="inl">scores.masked_fill(mask, -inf)</code>；用 <code class="inl">F.scaled_dot_product_attention(..., is_causal=True)</code> 还能自动调到 FlashAttention，把 O(T²) 的内存开销直接优化掉。nanochat 用了 PyTorch 的 SDPA，把 H100 的算力吃满。</p>
 
   <div class="callout">
     <span class="label">读源码定位</span>
-    <p>Transformer block 的实现在 <code class="inl">nanochat/gpt.py</code> 里的 <code class="inl">Block</code> 类——一个 <code class="inl">CausalSelfAttention</code> + 一个 <code class="inl">MLP</code> (SwiGLU)，两个都通过 RMSNorm + 残差加法接在一起。RoPE 的实现一般在 <code class="inl">layers.py</code> 中，作为 <code class="inl">apply_rotary</code> 类型的工具函数。</p>
+    <p>Transformer block 的实现在 <code class="inl">nanochat/gpt.py</code> 的 <code class="inl">Block</code> 类——一个 <code class="inl">CausalSelfAttention</code> 加一个 <code class="inl">MLP</code> (SwiGLU)，两者都通过 RMSNorm + 残差加法串起来。RoPE 的实现一般在 <code class="inl">layers.py</code> 里，以 <code class="inl">apply_rotary</code> 这类工具函数的形式存在。</p>
   </div>
 </section>
 
@@ -1763,7 +1763,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <p class="kicker">把 §4 的概念落到几百行 PyTorch 代码里。</p>
   </div>
 
-  <p class="opener">读到这里你应该对 Transformer 已经有了直觉。打开 nanochat 的 <code class="inl">nanochat/gpt.py</code> 你会发现它惊人地短——几百行而已。这一章把代码骨架拆开看，并讲一讲 nanochat 在<em>规模选择</em>与<em>优化器</em>上的两个有意思的决策。</p>
+  <p class="opener">读到这里，对 Transformer 应该已经有感觉了。打开 nanochat 的 <code class="inl">nanochat/gpt.py</code>，你会被它的短小吓一跳——拢共几百行。这一章拆开骨架看一遍，再聊两个 nanochat 比较有意思的决策：<em>规模怎么选</em>、<em>优化器怎么搭</em>。</p>
 
   <h3 class="section"><span class="sec-num">5.1</span>代码骨架</h3>
 
@@ -1822,54 +1822,54 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
         <span class="k">return</span> <span class="v">logits</span>, <span class="v">loss</span></pre>
   </div>
 
-  <p>这段代码差不多就是 <code class="inl">gpt.py</code> 的全貌（稍作概念化处理）。请把它和 §4 的概念图对照来看——每一个名字都对应一个你刚学过的零件。</p>
+  <p>这段代码（稍作概念化）基本就是 <code class="inl">gpt.py</code> 的全貌。对照 §4 的概念图看一眼——每个名字都能在刚学过的那些零件里对上号。</p>
 
   <h3 class="section"><span class="sec-num">5.2</span>规模选择：depth-driven scaling</h3>
 
-  <p>nanochat 给出了几个预设规模，通过一个核心超参 <code class="inl">depth</code> (= 层数 N) 来推导出所有其它维度。常见命名：<code class="inl">d20</code> / <code class="inl">d26</code> / <code class="inl">d32</code> 等，数字就是 depth。一组合理的耦合关系是：</p>
+  <p>nanochat 预置了几档规模，所有其它维度都从一个核心超参 <code class="inl">depth</code>（即层数 N）推出来。命名方式相当直白：<code class="inl">d20</code> / <code class="inl">d26</code> / <code class="inl">d32</code>，数字就是 depth。一套合理的耦合关系大致如下：</p>
 
   <ul class="list">
-    <li>$D$ (hidden size) ≈ 64 × depth，即 d20 ≈ 1280，d26 ≈ 1664，d32 ≈ 2048。</li>
-    <li>$H$ (num heads) ≈ depth/2 或某个让 $d_h = D / H$ 落在 64 ~ 128 的值。</li>
-    <li>$d_{ff}$ (FFN hidden) ≈ 4D 在 SwiGLU 风格下调成 ~2.67D。</li>
-    <li>训练步数与数据量按 Chinchilla 的 token/param ≈ 20 调比。</li>
+    <li>$D$（hidden size）≈ 64 × depth，于是 d20 ≈ 1280、d26 ≈ 1664、d32 ≈ 2048。</li>
+    <li>$H$（num heads）≈ depth/2，或让 $d_h = D / H$ 落在 64 ~ 128 之间。</li>
+    <li>$d_{ff}$（FFN hidden）经典是 4D，到了 SwiGLU 风格下收成 ~2.67D。</li>
+    <li>训练步数与数据量按 Chinchilla 的 token/param ≈ 20 配比。</li>
   </ul>
 
-  <p>这是一种"用一个数控制一切"的工程审美——你只需要决定"我要跑多深的模型"，其它都自动级联出合理值。这背后是大量的 scaling law 直觉。</p>
+  <p>这是一种"一个数管所有"的工程审美——只需决定"模型跑多深"，其它维度自动级联出合理值。背后是一堆 scaling law 直觉的沉淀。</p>
 
-  <p>speedrun 默认是 <code class="inl">d20</code>（约 5.6 亿参数），在 8×H100 上跑约 3-4 小时，云上租用 ~<span>$</span>100。这就是著名的 "<span>$</span>100 base model" 的来源。</p>
+  <p>speedrun 默认 <code class="inl">d20</code>（约 5.6 亿参数），8×H100 上跑 3 ~ 4 小时，云上租机大约 <span>$</span>100。这就是出圈的那个 "<span>$</span>100 base model" 的来源。</p>
 
   <h3 class="section"><span class="sec-num">5.3</span>优化器：Muon + AdamW 的混搭</h3>
 
-  <p>nanochat 一个让 CV 读者觉得新鲜的细节是它的优化器选型：</p>
+  <p>有个细节 CV 读者多半会觉得新鲜：nanochat 的优化器搭法。</p>
 
   <ul class="list">
-    <li>对所有<em>矩阵参数</em>（Linear 的权重，shape ≥ 2D）：使用 <em>Muon</em>，一个针对矩阵更新做了特殊正交化处理的优化器。它把每一步的梯度做一个 Newton-Schulz 迭代逼近的"矩阵符号"操作，相当于沿着所有奇异值方向都用大致相同的步长更新。</li>
-    <li>对其它参数（embeddings, biases, LayerNorm gain）：使用经典的 <em>AdamW</em>。</li>
+    <li><em>矩阵参数</em>（Linear 权重，shape ≥ 2D）走 <em>Muon</em>——专门给矩阵更新做正交化的优化器。每步把梯度过一道 Newton-Schulz 迭代，逼近"矩阵符号"操作，效果上等于沿所有奇异值方向都用差不多的步长更新。</li>
+    <li>其它参数（embeddings、biases、LayerNorm gain）继续走经典 <em>AdamW</em>。</li>
   </ul>
 
-  <p>这是近期一两年开源社区里出现的一个有意思的训练 trick。在等算力下，Muon 比 AdamW 在矩阵参数上效率提升明显。但 Muon 的更新规则在低维参数（向量、bias）上没有意义甚至不稳，所以混搭使用。这个细节在 nanochat 的 trainer 代码里有明确体现。</p>
+  <p>这是近一两年开源社区冒出来的一个有趣 trick。同样算力下，Muon 在矩阵参数上比 AdamW 明显省。但 Muon 的更新规则到了低维参数（向量、bias）上既没意义也容易翻车，所以混着用。nanochat 的 trainer 代码里这层区分写得很清楚。</p>
 
   <div class="callout analogy">
     <span class="label">CV 读者特别注意</span>
-    <p>你以前用 AdamW + cosine LR + warmup 就够了；LLM 训练有一些新工具进入主流。Muon 还在快速演进，但已经是 nanochat、modded-nanoGPT 等仓库的默认选择。理解它就要理解 Newton-Schulz iteration、矩阵正交化、谱归一化这些概念。</p>
+    <p>从前是 AdamW + cosine LR + warmup 一套打天下；到了 LLM，主流多了几样新工具。Muon 还在快速演进，但 nanochat、modded-nanoGPT 这类仓库已经把它当默认选项。要吃透 Muon，先把 Newton-Schulz 迭代、矩阵正交化、谱归一化这几个概念串起来。</p>
   </div>
 
   <h3 class="section"><span class="sec-num">5.4</span>稳定训练的几个工程要点</h3>
 
-  <p>nanochat 为了在小预算下稳定训出，还有几个值得点名的细节：</p>
+  <p>为了在小预算下也稳得住，nanochat 还有几个细节值得点名：</p>
 
   <ul class="list">
-    <li><strong>bfloat16 训练</strong>：模型权重和激活在 bfloat16，loss 在 fp32 累加。混合精度是标配。</li>
+    <li><strong>bfloat16 训练</strong>：权重和激活走 bfloat16，loss 用 fp32 累加。混合精度早已是标配。</li>
     <li><strong>梯度裁剪</strong>：<code class="inl">torch.nn.utils.clip_grad_norm_</code> 把全局梯度模长裁到 1.0，防 spike。</li>
-    <li><strong>warmup + cosine LR</strong>：典型 1-2% warmup，剩余按 cosine 衰减到峰值的 10%。</li>
-    <li><strong>FSDP / DDP</strong>：在多 GPU 上用 PyTorch FSDP 把权重分片，让模型能放进每张 GPU。</li>
-    <li><strong>DataLoader 的 shuffle</strong>：因为预训练数据是流式打包成 token，shuffle 主要在 chunk 级。</li>
+    <li><strong>warmup + cosine LR</strong>：典型 1 ~ 2% warmup，剩下按 cosine 衰到峰值的 10%。</li>
+    <li><strong>FSDP / DDP</strong>：多卡时用 PyTorch FSDP 把权重分片，模型才塞得进每张卡。</li>
+    <li><strong>DataLoader shuffle</strong>：预训练数据是流式打包好的 token 流，shuffle 主要发生在 chunk 一层。</li>
   </ul>
 
   <div class="callout">
     <span class="label">读源码定位</span>
-    <p><code class="inl">nanochat/gpt.py</code> 是模型；<code class="inl">nanochat/muon.py</code> 是 Muon 优化器；<code class="inl">scripts/base_train.py</code> 是 pretraining 训练入口；<code class="inl">nanochat/configurator.py</code> / <code class="inl">configs/</code> 里有 d20/d26/d32 的预设。</p>
+    <p><code class="inl">nanochat/gpt.py</code> 是模型；<code class="inl">nanochat/muon.py</code> 是 Muon 优化器；<code class="inl">scripts/base_train.py</code> 是 pretraining 入口；<code class="inl">nanochat/configurator.py</code> / <code class="inl">configs/</code> 里放着 d20 / d26 / d32 的预设。</p>
   </div>
 </section>
 
@@ -1883,30 +1883,30 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <p class="kicker">这一步是花钱最多、决定上限最深的一步。</p>
   </div>
 
-  <p class="opener">Pretraining 阶段做的事其实就是 §1.1 里写的目标：在大规模 web 文本上最小化 next-token cross-entropy。复杂的不是数学，而是<em>数据准备</em>、<em>分布式工程</em>与<em>调度技巧</em>。</p>
+  <p class="opener">Pretraining 干的事就是 §1.1 写过的那个目标：在大规模 web 文本上最小化 next-token cross-entropy。难的不是数学，而是<em>数据准备</em>、<em>分布式工程</em>和<em>调度技巧</em>。</p>
 
   <h3 class="section"><span class="sec-num">6.1</span>数据：FineWeb</h3>
 
-  <p>nanochat 默认用 <em>FineWeb</em> 作为预训练数据——这是 HuggingFace 整理的、从 Common Crawl 派生出来的高质量 web 文本子集。它已经做完了去重、语言筛选、低质过滤等繁琐工序，开箱即用。</p>
+  <p>nanochat 默认拿 <em>FineWeb</em> 作预训练数据——HuggingFace 从 Common Crawl 派生整理出的高质量 web 文本子集。去重、语言筛选、低质过滤这些繁琐活它都干完了，开箱即用。</p>
 
-  <p>整体的数据处理流程：</p>
+  <p>整条数据处理流程：</p>
 
   <ol class="list">
-    <li>下载 FineWeb 的 shards (每个 shard 一个 parquet)。</li>
-    <li>用第二章训出来的 tokenizer 把所有文本编码成 token id。</li>
-    <li>把 id 流打包成 <code class="inl">.bin</code> 文件（典型用 uint16，因为词表 ≤ 65536）。</li>
-    <li>训练时用 mmap 方式按 chunk 读取，零拷贝。</li>
+    <li>下载 FineWeb 的 shards（每个 shard 一个 parquet）。</li>
+    <li>用第二章训出来的 tokenizer 把所有文本编成 token id。</li>
+    <li>把 id 流打包成 <code class="inl">.bin</code> 文件（一般用 uint16，词表 ≤ 65536 够用）。</li>
+    <li>训练时用 mmap 按 chunk 读，零拷贝。</li>
   </ol>
 
-  <p>这种"先编码再训练"的做法是<em>所有现代 LLM 训练的标配</em>。tokenize 是 CPU bound 的，提前做完一次，训练时 GPU 才不会被 tokenizer 拖慢。</p>
+  <p>"先编码再训练"是<em>所有现代 LLM 训练的标配</em>。tokenize 是 CPU bound 的活，提前做完一次，训练时 GPU 才不会被 tokenizer 拖着走。</p>
 
   <h3 class="section"><span class="sec-num">6.2</span>训练目标</h3>
 
-  <p>把一个 batch 切成长度 $T$ 的序列：</p>
+  <p>把 batch 切成长度 $T$ 的序列：</p>
 
   <p>$$ \mathbf{x} = [x_1, x_2, \ldots, x_T], \quad \text{targets} = [x_2, x_3, \ldots, x_{T+1}] $$</p>
 
-  <p>也就是说，<em>"输入" 和 "目标" 是同一段序列错位一格</em>。一次 forward 拿到 $(B, T, V)$ 的 logits，与 targets 做 cross-entropy。注意每个位置都是一个独立的分类问题，所以 effective batch ≈ $B \cdot T$ 个样本。</p>
+  <p>也就是说，<em>"输入"和"目标"是同一段序列错位一格</em>。一次 forward 拿到 $(B, T, V)$ 的 logits，和 targets 算 cross-entropy。注意每个位置都是一个独立的分类问题，所以 effective batch ≈ $B \cdot T$ 个样本。</p>
 
   <h3 class="section"><span class="sec-num">6.3</span>训练循环</h3>
 
@@ -1929,18 +1929,18 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
         <span class="f">log</span>(<span class="v">step</span>, <span class="v">loss</span>.<span class="f">item</span>(), <span class="v">lr</span>=<span class="v">scheduler</span>.<span class="f">get_lr</span>())</pre>
   </div>
 
-  <p>除了"模型 + 数据"，剩下的一切看起来都和你训过的 CNN 没本质区别。<em>这就是 LLM 工程的迷人之处：核心循环几乎和 1989 年的 LeNet 训练一样简单</em>，复杂性几乎全藏在数据流和分布式细节里。</p>
+  <p>除了"模型 + 数据"，剩下的一切跟你训过的 CNN 没什么本质差别。<em>这就是 LLM 工程的迷人之处：核心循环几乎和 1989 年训 LeNet 一样简单</em>，复杂度几乎全藏在数据流和分布式细节里。</p>
 
   <h3 class="section"><span class="sec-num">6.4</span>评估：bpb 与验证 loss</h3>
 
-  <p>训练时会周期性评估两件事：</p>
+  <p>训练过程里会周期性看两件事：</p>
 
   <ul class="list">
-    <li><strong>Val loss</strong>：在 hold-out 的 web 文本上算 cross-entropy。这是 pretraining 期最直接的指标。</li>
-    <li><strong>bpb (bits per byte)</strong>：把 cross-entropy 换算到"平均每个字节用多少 bit 编码"，便于跨 tokenizer 比较。bpb 越低越好，好模型在 web 文本上一般 ~0.7-1.0 bpb。</li>
+    <li><strong>Val loss</strong>：在 hold-out 的 web 文本上算 cross-entropy。pretraining 期最直接的指标。</li>
+    <li><strong>bpb (bits per byte)</strong>：把 cross-entropy 折算成"平均每个字节用多少 bit 编码"，便于跨 tokenizer 比较。越低越好，好模型在 web 文本上一般落在 0.7 ~ 1.0 bpb。</li>
   </ul>
 
-  <p>注意：<em>pretraining 期间的 loss 几乎单调下降，但和"模型有多聪明"并不是线性关系</em>。下游能力（MMLU, GSM8K）的浮现往往非常突变，几乎需要"够多 token、够大模型"才会出现。</p>
+  <p>注意一点：<em>pretraining 期间 loss 几乎单调下降，但它和"模型有多聪明"并非线性关系</em>。下游能力（MMLU、GSM8K）的浮现往往很突兀——通常得"够多 token、够大模型"才会冒出来。</p>
 
   <div class="callout">
     <span class="label">读源码定位</span>
@@ -1958,15 +1958,15 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <p class="kicker">数据格式从"web 流水"换成"对话剧本"。</p>
   </div>
 
-  <p class="opener">Pretraining 出来的模型是个 <em>base model</em>：它会续写任何文本，但它<em>不知道自己是个 chatbot</em>。你问它 "What is 2 + 2?"，它可能续写出"is a math problem often used in elementary school..." 而不是"4"。让模型从"续写任意网页"切换到"扮演对话助手"，这就是 mid-training 与 SFT 要做的事。</p>
+  <p class="opener">Pretraining 出来的模型是 <em>base model</em>：它能续写任何文本，但<em>它不知道自己是个 chatbot</em>。问它 "What is 2 + 2?"，它可能给你续写出 "is a math problem often used in elementary school..."，而不是"4"。让模型从"续写任意网页"切换到"扮演对话助手"——这就是 mid-training 和 SFT 要干的活。</p>
 
   <h3 class="section"><span class="sec-num">7.1</span>为什么需要"中间"一步</h3>
 
-  <p>从 pretrain 直接跳到 SFT 也可以，但效果会差。原因是 base model 还没"见过"对话格式——它不认识 <code class="inl">&lt;|user|&gt;</code> / <code class="inl">&lt;|assistant|&gt;</code> 这些特殊 token 该长什么样、该出现在哪里。把对话格式与一些<em>有结构的能力数据</em>（多选题、数学题、工具调用）混在一起做中训练，相当于在 base model 与 SFT 之间架了一座过渡桥。</p>
+  <p>pretrain 直接跳到 SFT 也可以，但效果会打折。base model 没"见过"对话格式——它不认识 <code class="inl">&lt;|user|&gt;</code> / <code class="inl">&lt;|assistant|&gt;</code> 这些特殊 token 该长什么样、该出现在哪儿。把对话格式和一些<em>有结构的能力数据</em>（多选题、数学题、工具调用）混在一起做中训练，相当于在 base model 与 SFT 之间架了一座过渡桥。</p>
 
   <h3 class="section"><span class="sec-num">7.2</span>对话模板（chat template）</h3>
 
-  <p>nanochat 使用一套与 GPT-4 / Claude 等商用模型类似的 chat template。一段对话会被序列化成这样：</p>
+  <p>nanochat 用的 chat template 和 GPT-4 / Claude 等商用模型大同小异。一段对话被序列化成这样：</p>
 
   <div class="code">
     <div class="label"><span>chat template · 概念示例</span><span class="tag">format</span></div>
@@ -1978,26 +1978,26 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
 <span class="o">&lt;|eos|&gt;</span></pre>
   </div>
 
-  <p>这些角标都是<em>特殊 token</em>，由 tokenizer 显式预留 id。它们的作用：</p>
+  <p>这些角标都是<em>特殊 token</em>，tokenizer 显式预留了 id。它们干三件事：</p>
 
   <ul class="list">
-    <li>告诉模型每一段是谁说的（用户 / 助手 / 系统 / 工具）。</li>
-    <li>给模型"何时停"的信号——预测出 <code class="inl">&lt;|eoa|&gt;</code> 后就把这一轮 assistant turn 结束。</li>
-    <li>区分训练时哪段算 loss——典型只对 assistant 那一段算 cross-entropy，user 的部分作为上下文不计 loss。</li>
+    <li>告诉模型这一段是谁说的（用户 / 助手 / 系统 / 工具）。</li>
+    <li>给模型"该停了"的信号——一旦预测出 <code class="inl">&lt;|eoa|&gt;</code>，这一轮 assistant turn 就结束。</li>
+    <li>区分训练时哪段算 loss——一般只对 assistant 那段算 cross-entropy，user 部分当作上下文，不计 loss。</li>
   </ul>
 
   <h3 class="section"><span class="sec-num">7.3</span>数据混合</h3>
 
-  <p>nanochat 的 mid-training 数据是一个有意思的混合体：</p>
+  <p>nanochat 的 mid-training 数据是个有趣的混合体：</p>
 
   <ul class="list">
-    <li>多轮对话 (SmolTalk 子集) ——学对话格式。</li>
-    <li>多选题数据 (MMLU-style) ——学"读题目+在 A/B/C/D 里选"的格式。</li>
-    <li>GSM8K 数学题，含工具调用 ——学"什么时候调 calculator"。</li>
-    <li>少量 base-model 风格的 web 文本 ——防止灾难性遗忘。</li>
+    <li>多轮对话（SmolTalk 子集）——学对话格式。</li>
+    <li>多选题数据（MMLU-style）——学"读题 + 在 A/B/C/D 里选"的格式。</li>
+    <li>GSM8K 数学题，含工具调用——学"什么时候该调 calculator"。</li>
+    <li>少量 base-model 风格的 web 文本——防灾难性遗忘。</li>
   </ul>
 
-  <p>这个阶段的训练目标仍然是<em>同一个</em> next-token cross-entropy，只是 loss 通常在 user 段被 mask 掉，只对 assistant + special token 那部分算 loss。</p>
+  <p>这一阶段的训练目标还是<em>同一个</em> next-token cross-entropy，只是 loss 一般在 user 段被 mask 掉，只对 assistant + special token 那部分计 loss。</p>
 
   <div class="callout">
     <span class="label">读源码定位</span>
@@ -2015,32 +2015,32 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <p class="kicker">SFT 让模型从"会聊天的格式"长成"会好好回答的助手"。</p>
   </div>
 
-  <p class="opener">SFT (Supervised Fine-Tuning) 是从 base/mid model 走向真正 chatbot 的关键一步。它惊人地朴素：<em>用同一个 next-token cross-entropy，在精挑细选的指令-回答数据上继续训几个 epoch</em>。复杂性不在算法，而在数据质量。</p>
+  <p class="opener">SFT (Supervised Fine-Tuning) 是从 base/mid model 走向真正 chatbot 的关键一步。它朴素得让人惊讶：<em>同一个 next-token cross-entropy，在精挑细选的指令-回答数据上再训几个 epoch</em>。复杂性不在算法，全在数据质量。</p>
 
   <h3 class="section"><span class="sec-num">8.1</span>本质：还是 cross-entropy</h3>
 
-  <p>SFT 在数学上和 pretraining 几乎没差别：</p>
+  <p>SFT 数学上跟 pretraining 几乎没差别：</p>
 
   <p>$$ \mathcal{L}_{\text{SFT}}(\theta) \;=\; -\sum_{(q, a) \in \mathcal{D}_{\text{SFT}}} \sum_{t \in \text{assistant turns}} \log p_\theta(a_t \mid q, a_{&lt;t}) $$</p>
 
-  <p>$\mathcal{D}_{\text{SFT}}$ 是高质量对话数据集，loss 只在 assistant 段累加。<em>换了数据，没换损失</em>。这是 SFT 最重要的 mental model——它不是"另一种训练方式"，而是 pretraining 的延续，只是数据从"什么都吃"变成了"只吃好的"。</p>
+  <p>$\mathcal{D}_{\text{SFT}}$ 是高质量对话数据集，loss 只在 assistant 段累加。<em>换了数据，没换损失</em>——这是理解 SFT 最关键的 mental model。它不是"另一种训练方式"，而是 pretraining 的延续，只不过数据从"什么都吃"变成"只吃好的"。</p>
 
   <h3 class="section"><span class="sec-num">8.2</span>nanochat 的 SFT 数据</h3>
 
-  <p>nanochat 用的是 <em>SmolTalk</em> 的子集，单轮居多。SmolTalk 由 HuggingFace 整理，覆盖范围广、风格干净，是开源界做小规模 SFT 的常用选择。除此之外可能还混入一些显式的安全模板与小样本数学/代码样例。</p>
+  <p>nanochat 用 <em>SmolTalk</em> 的子集，单轮居多。SmolTalk 是 HuggingFace 整理的，覆盖广、风格干净，是开源界做小规模 SFT 的常用选择。此外可能还混入一些显式的安全模板和小样本数学/代码示例。</p>
 
   <h3 class="section"><span class="sec-num">8.3</span>训练细节</h3>
 
   <ul class="list">
-    <li>训练步数远小于 pretraining（典型 1-3 个 epoch）。</li>
-    <li>学习率比 pretrain 末期还要低，避免抹掉预训练里学到的世界知识。</li>
-    <li>batch size 通常更小，因为单条样本更短。</li>
-    <li>只对 assistant token 算 loss，user token 与 special token 之外的内容 mask 掉。</li>
+    <li>训练步数远小于 pretraining（一般 1 ~ 3 个 epoch）。</li>
+    <li>学习率比 pretrain 末期还要低，避免把预训练学到的世界知识冲掉。</li>
+    <li>batch size 通常更小，单条样本本来就更短。</li>
+    <li>只对 assistant token 算 loss，user token 和 special token 之外的内容都 mask 掉。</li>
   </ul>
 
   <div class="callout warn">
     <span class="label">陷阱</span>
-    <p>SFT 之后的模型有强烈倾向去"模仿"训练数据里的语气和长度——如果 SFT 数据全是 5 句话以内的简短回答，模型就再也学不会写长文档了。这是 SFT 的根本局限——它只能模仿你<em>展示</em>给它的东西。要让模型超越训练数据，需要 RL（下一章）。</p>
+    <p>SFT 后的模型有强烈倾向去"模仿"训练数据的语气和长度——如果 SFT 数据全是 5 句话以内的短回答，那模型就再也学不会写长文档了。这是 SFT 的根本局限——它只能模仿你<em>展示</em>给它看的东西。想让模型超越训练数据，得靠 RL（下一章）。</p>
   </div>
 
   <div class="callout">
@@ -2059,35 +2059,35 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <p class="kicker">SFT 的极限是模仿；RL 让模型超越示例去优化目标。</p>
   </div>
 
-  <p class="opener">前面所有阶段都在做"让 next-token 分布逼近某个数据分布"。RL 是 nanochat pipeline 里第一次让模型去优化一个<em>外部定义的标量目标</em>。它在 nanochat 里被用得很克制——只在 GSM8K (数学题) 上做，因为那是少数几个有客观"对/错"奖励的任务。</p>
+  <p class="opener">前面所有阶段都在做"让 next-token 分布逼近某个数据分布"。RL 是 nanochat pipeline 里第一次让模型去优化一个<em>外部定义的标量目标</em>。在 nanochat 里它被用得很克制——只在 GSM8K（数学题）上跑，因为那是少数几个能给客观"对/错"奖励的任务。</p>
 
   <h3 class="section"><span class="sec-num">9.1</span>为什么 SFT 不够</h3>
 
-  <p>SFT 只能教模型"在训练数据展示过的回答风格里挑一个最像的"。但很多任务的最优答案是高度<em>组合性</em>的：数学题里有 1000 种正确的推理路径、代码题里有无数种通过测试的写法。光靠模仿，模型永远学不到"这道题怎么<em>解</em>"，只能学到"这道题<em>看起来</em>该长啥样"。</p>
+  <p>SFT 只能教模型"在训练数据展示过的回答风格里挑一个最像的"。但很多任务的最优答案高度<em>组合化</em>：数学题有 1000 种正确推理路径、代码题有无数种过单测的写法。光靠模仿，模型永远学不到"这道题怎么<em>解</em>"，只学得到"这道题<em>看起来</em>该长啥样"。</p>
 
-  <p>RL 的提议很简单：让模型自己尝试生成答案，对每个答案给一个 reward（数学题就是"答对了 = 1，答错 = 0"），然后用 policy gradient 把<em>能拿到高 reward 的输出概率提高</em>，<em>低 reward 的降下来</em>。</p>
+  <p>RL 的思路很简单：让模型自己生成答案，对每个答案打一个 reward（数学题就是"答对 = 1，答错 = 0"），再用 policy gradient 把<em>高 reward 输出的概率拉上去</em>、<em>低 reward 的压下来</em>。</p>
 
-  <h3 class="section"><span class="sec-num">9.2</span>GRPO：一个用得开的 RL 算法</h3>
+  <h3 class="section"><span class="sec-num">9.2</span>GRPO：一个真能跑的 RL 算法</h3>
 
-  <p>近两年开源 LLM 里 RL 的事实标准从 PPO 慢慢演化到了 <em>GRPO (Group Relative Policy Optimization)</em>，由 DeepSeek 在 2024 年提出，nanochat 也采用它。核心想法分两步：</p>
+  <p>近两年开源 LLM 圈里，RL 的事实标准从 PPO 慢慢演化到了 <em>GRPO (Group Relative Policy Optimization)</em>，DeepSeek 在 2024 年提出，nanochat 也用它。核心想法分两步：</p>
 
-  <p><strong>步骤一：同 prompt 多 sample。</strong> 对每个 prompt $q$，让当前模型用一定的 temperature 采样 $G$ 个回答 $\{a_1, a_2, \ldots, a_G\}$（典型 $G = 4$ 到 $16$）。每个回答 $a_i$ 都跑 reward 函数得到一个标量 $r_i$。</p>
+  <p><strong>步骤一：同 prompt 多 sample。</strong> 对每个 prompt $q$，当前模型带一点 temperature 采样 $G$ 个回答 $\{a_1, a_2, \ldots, a_G\}$（一般 $G = 4$ 到 $16$）。每个回答 $a_i$ 过一遍 reward 函数，拿到一个标量 $r_i$。</p>
 
-  <p><strong>步骤二：用 reward 在 group 内做归一化。</strong> 计算 group 内 reward 的均值 $\mu$ 与标准差 $\sigma$，每个回答的"优势 (advantage)"为：</p>
+  <p><strong>步骤二：在 group 内对 reward 做归一化。</strong> 算出 group 内 reward 的均值 $\mu$ 和标准差 $\sigma$，每个回答的"优势 (advantage)"是：</p>
 
   <p>$$ \hat{A}_i \;=\; \frac{r_i - \mu}{\sigma + \epsilon} $$</p>
 
-  <p>这就把"绝对 reward"变成了"在这批 sample 里的相对好坏"。优势函数高的 sample 应该被鼓励，低的应该被压制。</p>
+  <p>这就把"绝对 reward"换成了"在这批 sample 里的相对好坏"。优势高的 sample 该被鼓励，低的该被压。</p>
 
-  <p><strong>步骤三：policy gradient 更新。</strong> 用一个 PPO-clip 风格的目标更新策略 $\pi_\theta$（也就是模型）：</p>
+  <p><strong>步骤三：policy gradient 更新。</strong> 用一个 PPO-clip 风格的目标去更新策略 $\pi_\theta$（也就是模型）：</p>
 
   <p>$$ \mathcal{L}_{\text{GRPO}}(\theta) \;=\; -\frac{1}{G} \sum_{i=1}^{G} \min\!\Big( \rho_i(\theta)\, \hat{A}_i,\; \text{clip}(\rho_i(\theta), 1-\epsilon, 1+\epsilon)\, \hat{A}_i \Big) \;+\; \beta\, \text{KL}(\pi_\theta \| \pi_{\text{ref}}) $$</p>
 
-  <p>其中 $\rho_i(\theta) = \pi_\theta(a_i \mid q) / \pi_{\text{old}}(a_i \mid q)$ 是新旧策略的概率比，clip 防止单步更新过猛，KL 项把策略拉回参考模型 (SFT 后的模型) 附近，防止 reward hacking 时崩坏。</p>
+  <p>其中 $\rho_i(\theta) = \pi_\theta(a_i \mid q) / \pi_{\text{old}}(a_i \mid q)$ 是新旧策略的概率比，clip 防止单步更新过猛，KL 项把策略拉回参考模型（SFT 后的模型）附近，免得 reward hacking 时整个崩掉。</p>
 
   <div class="callout analogy">
     <span class="label">和 PPO 的区别</span>
-    <p>PPO 需要一个独立的 value network 估计 baseline；GRPO <em>用 group 内 reward 的均值作为 baseline</em>，省掉了 value model，工程上简单很多，对小模型尤其友好。这就是为什么 GRPO 在 nanochat 这种规模的 repo 里能跑得起来。</p>
+    <p>PPO 要一个独立的 value network 来估 baseline；GRPO <em>直接拿 group 内 reward 的均值当 baseline</em>，省掉了 value model，工程上简单很多，对小模型尤其友好。这就是 GRPO 能在 nanochat 这种规模的 repo 里跑起来的原因。</p>
   </div>
 
   <h3 class="section"><span class="sec-num">9.3</span>nanochat 的 RL 设定</h3>
@@ -2095,13 +2095,13 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
   <p>nanochat 把 RL 限定在 GSM8K（小学数学应用题）上：</p>
 
   <ul class="list">
-    <li><strong>Reward 函数</strong>：模型输出里抽出最后的数字，和标准答案做匹配——对 = 1，错 = 0。简单、可验证、便宜。</li>
-    <li><strong>Group size</strong>：每个 prompt 采样 8 个回答。</li>
-    <li><strong>Reference model</strong>：取 SFT 阶段结束时的 checkpoint，固定不动。</li>
-    <li><strong>训练步数</strong>：相对 pretrain 极少（数千 step）。</li>
+    <li><strong>Reward 函数</strong>：从模型输出里抽出最后的数字，和标准答案比对——对 = 1，错 = 0。简单、可验证、便宜。</li>
+    <li><strong>Group size</strong>：每个 prompt 采 8 个回答。</li>
+    <li><strong>Reference model</strong>：取 SFT 末尾那个 checkpoint，固定不动。</li>
+    <li><strong>训练步数</strong>：和 pretrain 比起来极少（几千 step）。</li>
   </ul>
 
-  <p>RL 阶段的最大代价是<em>采样</em>——每一步 forward 之前都要先 generate $G$ 个回答，这个 generate 过程比 single forward 慢得多。所以 nanochat 的 RL 是可选的：speedrun 里默认跑，但你可以跳过。即使跳过，从 SFT 出来的模型也已经能用了。</p>
+  <p>RL 阶段最贵的是<em>采样</em>——每一步 forward 之前都得先 generate $G$ 个回答，generate 比 single forward 慢得多。所以 nanochat 的 RL 是可选的：speedrun 默认会跑，但跳过也行。即便跳过，SFT 出来的模型也已经能用了。</p>
 
   <div class="callout">
     <span class="label">读源码定位</span>
@@ -2119,11 +2119,11 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <p class="kicker">把训练好的权重变成一个真正能对话的系统。</p>
   </div>
 
-  <p class="opener">训练只解决了"模型是什么"，剩下的"怎么把它跑起来给人用"是另一套工程。这一章讲三件事：generation loop 的本质、KV cache 为什么必不可少、采样策略的几个旋钮。</p>
+  <p class="opener">训练只解决了"模型是什么"，怎么把它跑起来给人用是另一套工程。这一章讲三件事：generation loop 的本质、KV cache 为什么不能少、采样策略上那几个旋钮。</p>
 
   <h3 class="section"><span class="sec-num">10.1</span>朴素 generate 循环</h3>
 
-  <p>从最朴素的 generation 开始：</p>
+  <p>先从最朴素的 generation 看起：</p>
 
   <div class="code">
     <div class="label"><span>generate · 朴素版本（O(T²) 累计 forward）</span><span class="tag">python</span></div>
@@ -2137,11 +2137,11 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <span class="k">return</span> <span class="v">ids</span></pre>
   </div>
 
-  <p>问题在第三行：每多生成一个 token，整条序列都要被重新 forward 一次。第 $t$ 步的代价是 $O(t)$，整个 generate 的总代价是 $O(T^2)$——而且大部分计算是<em>重复的</em>：第 100 步算的前 99 个位置的注意力和第 99 步几乎一样。</p>
+  <p>问题在第三行：每多生成一个 token，整条序列都得重新 forward 一遍。第 $t$ 步代价 $O(t)$，整个 generate 总代价是 $O(T^2)$——而且大部分计算是<em>重复的</em>：第 100 步算的前 99 个位置的注意力，跟第 99 步几乎一模一样。</p>
 
   <h3 class="section"><span class="sec-num">10.2</span>KV cache：把"重复"省掉</h3>
 
-  <p>注意到一个事实：因果掩码意味着<em>位置 $t$ 的 K, V 一旦算出来，就永远不会再变</em>。新生成的 token 不会"反向修改"已有 token 的 K, V。所以我们可以把每一层的 K, V 缓存下来，下一步只算<em>新位置</em>的 Q, K, V，把新 Q 与<em>整张缓存里的 K</em>做注意力即可。</p>
+  <p>关键观察：因果掩码意味着<em>位置 $t$ 的 K, V 一旦算出来，就永远不再变</em>。新生成的 token 不会"反向修改"已有 token 的 K, V。所以可以把每一层的 K, V 缓存起来，下一步只算<em>新位置</em>的 Q, K, V，把新 Q 和<em>整张缓存里的 K</em>做注意力就行。</p>
 
   <figure class="fig">
     <div class="svg-scroll">
@@ -2203,33 +2203,33 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <figcaption><span class="figref">FIG 10·1</span>KV cache 让 generation 从 O(T²) 降到 O(T)，代价是 KV 张量驻留显存。</figcaption>
   </figure>
 
-  <p>代价是 KV cache 占显存：每层、每 head、每个 token 都要保存一份 K 和 V 张量。对长上下文 (~128k) 模型，KV cache 可能比模型权重本身还要大。优化 KV cache (GQA, MQA, paged attention 等) 是 LLM 推理工程的核心战场之一。nanochat 是教学仓库，KV cache 的实现保持简单，但 idea 完整。</p>
+  <p>代价是 KV cache 吃显存：每层、每个 head、每个 token 都要存一份 K 和 V 张量。对长上下文（~128k）模型，KV cache 甚至能比模型权重本身还大。怎么优化 KV cache（GQA、MQA、paged attention 等）是 LLM 推理工程最核心的战场之一。nanochat 是教学仓库，KV cache 的实现保持简单，但思路完整。</p>
 
   <h3 class="section"><span class="sec-num">10.3</span>采样策略：temperature, top-k, top-p</h3>
 
-  <p>给定 logits，怎么从中"选"下一个 token？</p>
+  <p>有了 logits，怎么从里面"选"下一个 token？</p>
 
   <ul class="list">
-    <li><strong>Greedy</strong>：直接取 argmax。确定但单调，容易重复。</li>
-    <li><strong>Pure sampling</strong>：直接按 softmax(logits) 采样。多样但容易跑偏到低概率的 token。</li>
-    <li><strong>Temperature</strong>：在 softmax 前把 logits 除以 $\tau$。$\tau \to 0$ 退化为 greedy，$\tau \to \infty$ 退化为均匀分布。典型 0.7 ~ 1.0。</li>
-    <li><strong>Top-k</strong>：只在概率最高的 k 个 token 里采。截断长尾。</li>
+    <li><strong>Greedy</strong>：直接取 argmax。确定但单调，容易重复打转。</li>
+    <li><strong>Pure sampling</strong>：直接按 softmax(logits) 采。多样，但容易跑偏到低概率的 token 上。</li>
+    <li><strong>Temperature</strong>：softmax 之前先把 logits 除以 $\tau$。$\tau \to 0$ 退化成 greedy，$\tau \to \infty$ 退化成均匀分布。常用 0.7 ~ 1.0。</li>
+    <li><strong>Top-k</strong>：只在概率最高的 k 个 token 里采。截掉长尾。</li>
     <li><strong>Top-p (nucleus)</strong>：按概率从高到低累加，截到累积概率达到 p 为止，在这些 token 里采。比 top-k 更自适应。</li>
   </ul>
 
-  <p>nanochat 的 inference engine 把这些都暴露成参数。日常对话默认温度 ~0.7、top-p ~0.9 比较稳。要做评估 (eval) 时建议用 greedy，因为可复现。</p>
+  <p>nanochat 的 inference engine 把这些全部暴露成参数。日常对话默认温度 ~0.7、top-p ~0.9 比较稳。做评估（eval）时建议用 greedy，可复现。</p>
 
   <h3 class="section"><span class="sec-num">10.4</span>Chat Web 前端</h3>
 
-  <p>nanochat 还配套了一个最小聊天前端：FastAPI 后端 + 简单 HTML/JS 页面 (<code class="inl">scripts/chat_web.py</code>)。它做的事很直接：</p>
+  <p>nanochat 还配套了一个最小的聊天前端：FastAPI 后端 + 简单的 HTML/JS 页面（<code class="inl">scripts/chat_web.py</code>）。流程很直接：</p>
 
   <ol class="list">
-    <li>启动一个 FastAPI server，加载训练好的权重。</li>
-    <li>页面把用户输入按 chat template 序列化，发请求。</li>
-    <li>后端 stream-style 逐 token 返回，前端边收边渲染。</li>
+    <li>启一个 FastAPI server，加载训好的权重。</li>
+    <li>页面把用户输入按 chat template 序列化后发请求。</li>
+    <li>后端 stream 风格逐 token 返回，前端边收边渲染。</li>
   </ol>
 
-  <p>麻雀虽小五脏俱全——它让你在本地浏览器里就能和你刚训出来的模型聊天。<em>这是整个 pipeline 最有"魔法时刻"感的一步</em>。</p>
+  <p>麻雀虽小五脏俱全——本地浏览器里就能和你刚训出来的模型聊。<em>这是整条 pipeline 里最有"魔法时刻"感的一步</em>。</p>
 
   <div class="callout">
     <span class="label">读源码定位</span>
@@ -2247,7 +2247,7 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <p class="kicker">没有评估就没有迭代。</p>
   </div>
 
-  <p class="opener">训练 LLM 和训练分类器最大的体验差异，就是<em>评估的复杂性</em>。ImageNet 给你一个 top-1 准确率就完事了；LLM 没有任何单一指标能覆盖它的能力面。nanochat 内置了几个标准评估集，分类如下。</p>
+  <p class="opener">训 LLM 和训分类器，体验上最大的落差就是<em>评估有多复杂</em>。ImageNet 一个 top-1 准确率就交差了；LLM 没有任何单一指标能盖住它整个能力面。nanochat 内置了几个标准评估集，分类如下。</p>
 
   <h3 class="section"><span class="sec-num">11.1</span>核心评估集</h3>
 
@@ -2257,10 +2257,10 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
         <tr><th style="width:18%">名称</th><th style="width:24%">测什么</th><th>形式</th></tr>
       </thead>
       <tbody>
-        <tr><td>MMLU</td><td>跨学科常识</td><td>57 个学科的多选题 (A/B/C/D)；测"知识广度"</td></tr>
-        <tr><td>ARC-Easy / ARC-Challenge</td><td>小学科学常识</td><td>多选题；测"科学常识推理"</td></tr>
-        <tr><td>GSM8K</td><td>小学应用题</td><td>给一段题目，模型必须 chain-of-thought 解出最终数字</td></tr>
-        <tr><td>HumanEval</td><td>代码生成</td><td>给函数签名+docstring，让模型补函数体，跑单测看通过率</td></tr>
+        <tr><td>MMLU</td><td>跨学科常识</td><td>57 个学科的多选题（A/B/C/D），测"知识广度"</td></tr>
+        <tr><td>ARC-Easy / ARC-Challenge</td><td>小学科学常识</td><td>多选题，测"科学常识推理"</td></tr>
+        <tr><td>GSM8K</td><td>小学应用题</td><td>给一段题，模型得 chain-of-thought 解出最终数字</td></tr>
+        <tr><td>HumanEval</td><td>代码生成</td><td>给函数签名 + docstring，让模型补函数体，跑单测看通过率</td></tr>
         <tr><td>ChatCORE</td><td>综合对话能力</td><td>nanochat 自家的小规模综合评估</td></tr>
       </tbody>
     </table>
@@ -2268,21 +2268,21 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
 
   <h3 class="section"><span class="sec-num">11.2</span>多选题怎么"考"模型</h3>
 
-  <p>多选题的实现技巧：把题目和选项一起编码，分别在四个选项的位置上取 logits，比较"该选项的对数概率"（或归一化后的 acc-norm）。无需让模型"输出 A/B/C/D"，更稳定也更可复现。</p>
+  <p>多选题的实现技巧：把题目和选项一起编码，分别在四个选项的位置上取 logits，比"该选项的对数概率"（或归一化后的 acc-norm）。不用让模型真"输出 A/B/C/D"，更稳定也更可复现。</p>
 
   <h3 class="section"><span class="sec-num">11.3</span>生成类评估的麻烦</h3>
 
-  <p>GSM8K 和 HumanEval 这类生成式评估要让模型真正<em>生成</em>答案。陷阱很多：</p>
+  <p>GSM8K 和 HumanEval 这类生成式评估，得让模型真正<em>生成</em>答案。坑不少：</p>
 
   <ul class="list">
-    <li>解析模型最终输出的数字 / 代码，需要写规则提取。</li>
-    <li>采样随机性意味着多跑几次结果会变；评估时用 greedy 才公平。</li>
-    <li>HumanEval 还需要在沙箱里执行模型生成的代码——nanochat 用 timeouts 简单防御一下。</li>
+    <li>从模型最终输出里抽出数字 / 代码，需要写规则提取。</li>
+    <li>采样有随机性，多跑几次结果就变；评估用 greedy 才公平。</li>
+    <li>HumanEval 还得在沙箱里执行模型生成的代码——nanochat 用 timeouts 做了点简单防御。</li>
   </ul>
 
   <h3 class="section"><span class="sec-num">11.4</span>报告（report.md）</h3>
 
-  <p>跑完 <code class="inl">speedrun.sh</code> 后，nanochat 会生成一份 <code class="inl">report.md</code>，把所有评估结果汇总成表格。Karpathy 在 demo 里展示过这份 report——这就是你跑出来的"<span>$</span>100 model"的成绩单。</p>
+  <p>跑完 <code class="inl">speedrun.sh</code>，nanochat 会生成一份 <code class="inl">report.md</code>，把所有评估结果汇成表格。Karpathy 在 demo 里晒过这份 report——这就是你跑出来的"<span>$</span>100 model"的成绩单。</p>
 
   <div class="callout">
     <span class="label">读源码定位</span>
@@ -2300,35 +2300,35 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
     <p class="kicker">最有效的学习，是真的让它在你眼前跑一次。</p>
   </div>
 
-  <p class="opener">读懂一切之后，让它真的跑一次。下面是建议的实操路径。</p>
+  <p class="opener">所有道理都通了之后，让它真跑一次。下面是建议的实操路径。</p>
 
   <h3 class="section"><span class="sec-num">12.1</span>最小可行环境</h3>
 
-  <p>nanochat 的"<span>$</span>100 speedrun"目标硬件是 8 × H100 80GB。在 RunPod / Lambda / Vast.ai 等云上租 ~<span>$</span>3/小时，跑 ~3-4 小时就能完成完整 pipeline。如果只有单卡：</p>
+  <p>nanochat 的"<span>$</span>100 speedrun"目标硬件是 8 × H100 80GB。RunPod / Lambda / Vast.ai 等云平台上租 ~<span>$</span>3/小时，3 ~ 4 小时就能跑完整条 pipeline。如果只有单卡：</p>
 
   <ul class="list">
-    <li>单 H100 / A100 80GB：可以跑 <code class="inl">d20</code>，但训得慢，几十小时。</li>
-    <li>单 RTX 4090：可以跑更小的 <code class="inl">d12 / d16</code>，作为"它真的能跑"的验证。</li>
-    <li>CPU/Mac：不行，至少要能跑 CUDA。</li>
+    <li>单 H100 / A100 80GB：能跑 <code class="inl">d20</code>，但慢，要几十小时。</li>
+    <li>单 RTX 4090：能跑更小的 <code class="inl">d12 / d16</code>，作为"它真能跑"的验证。</li>
+    <li>CPU / Mac：不行，至少得能跑 CUDA。</li>
   </ul>
 
-  <h3 class="section"><span class="sec-num">12.2</span>建议的分步学习实操</h3>
+  <h3 class="section"><span class="sec-num">12.2</span>建议的分步实操</h3>
 
   <ol class="list">
-    <li><strong>第一步</strong>：克隆仓库，<code class="inl">poetry install</code> 把环境装好。读 <code class="inl">speedrun.sh</code>。</li>
-    <li><strong>第二步</strong>：单独跑 <code class="inl">scripts/tok_train.py</code>，训一次 BPE。打开 tokenizer 看 vocab。</li>
-    <li><strong>第三步</strong>：用极小配置（depth=8、几千 step）跑一次 <code class="inl">base_train.py</code>，观察 loss 下降。</li>
-    <li><strong>第四步</strong>：跑完整 speedrun。观察每一步生成的 checkpoint。</li>
-    <li><strong>第五步</strong>：打开 <code class="inl">chat_web.py</code>，让它服务你的 SFT 模型，在浏览器里聊。</li>
-    <li><strong>第六步</strong>：跳出 speedrun，尝试改一个东西：换数据、换 depth、关掉 RL、加 layer——观察 report.md 变化。</li>
+    <li><strong>第一步</strong>：克隆仓库，<code class="inl">poetry install</code> 装好环境。读 <code class="inl">speedrun.sh</code>。</li>
+    <li><strong>第二步</strong>：单独跑 <code class="inl">scripts/tok_train.py</code> 训一次 BPE。打开 tokenizer 看 vocab。</li>
+    <li><strong>第三步</strong>：用极小配置（depth=8、几千 step）跑一次 <code class="inl">base_train.py</code>，看 loss 怎么下降。</li>
+    <li><strong>第四步</strong>：跑完整 speedrun。盯着每一步落下来的 checkpoint。</li>
+    <li><strong>第五步</strong>：起 <code class="inl">chat_web.py</code>，让它给你的 SFT 模型当后端，在浏览器里聊。</li>
+    <li><strong>第六步</strong>：跳出 speedrun，动一个东西看看：换数据、换 depth、关掉 RL、加 layer——看 report.md 怎么变。</li>
   </ol>
 
-  <h3 class="section"><span class="sec-num">12.3</span>该看的指标</h3>
+  <h3 class="section"><span class="sec-num">12.3</span>该盯的指标</h3>
 
   <ul class="list">
-    <li>训练时：loss / 步、tokens/sec、GPU 利用率、显存占用。</li>
-    <li>评估时：MMLU / ARC / GSM8K / HumanEval / ChatCORE 五项。</li>
-    <li>主观时：自己在 chat UI 里问几个固定问题，作为"smell test"。</li>
+    <li>训练时：loss/步、tokens/sec、GPU 利用率、显存占用。</li>
+    <li>评估时：MMLU / ARC / GSM8K / HumanEval / ChatCORE 这五项。</li>
+    <li>主观时：自己在 chat UI 里问几个固定问题，当"smell test"。</li>
   </ul>
 </section>
 
@@ -2346,8 +2346,8 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
 
   <ul class="list">
     <li><strong>Transformer 起源</strong>：Attention Is All You Need (2017)。</li>
-    <li><strong>GPT 系列</strong>：GPT-1 / GPT-2 / GPT-3。GPT-2 paper 是 decoder-only LM 的奠基。</li>
-    <li><strong>Llama 系列</strong>：Llama 1 (RoPE, RMSNorm, SwiGLU 的现代组合)、Llama 2 (chat 训练流程)。</li>
+    <li><strong>GPT 系列</strong>：GPT-1 / GPT-2 / GPT-3。GPT-2 paper 是 decoder-only LM 的奠基之作。</li>
+    <li><strong>Llama 系列</strong>：Llama 1（RoPE、RMSNorm、SwiGLU 的现代组合）、Llama 2（chat 训练流程）。</li>
     <li><strong>Scaling Laws</strong>：Kaplan et al. (2020)、Hoffmann et al. (2022, "Chinchilla")。</li>
     <li><strong>RoPE</strong>：RoFormer (Su et al., 2021)。</li>
     <li><strong>RL / GRPO</strong>：InstructGPT (PPO)、DeepSeekMath (GRPO)、DeepSeek-R1。</li>
@@ -2357,26 +2357,26 @@ w i d e s t _ w i d e s t _ w i d e s t _</pre>
   <h3 class="section"><span class="sec-num">13.2</span>视频与课程</h3>
 
   <ul class="list">
-    <li>Karpathy "Let's build GPT" 视频系列：是 nanoGPT 的录像版讲解，配合本手稿食用绝佳。</li>
+    <li>Karpathy "Let's build GPT" 视频系列：nanoGPT 的录像版讲解，配本手稿食用绝佳。</li>
     <li>Karpathy "Let's build the GPT tokenizer"：BPE 视频版，比任何文字都直观。</li>
     <li>Stanford CS224N / Stanford CS25 公开课。</li>
   </ul>
 
-  <h3 class="section"><span class="sec-num">13.3</span>可以做的实验</h3>
+  <h3 class="section"><span class="sec-num">13.3</span>可以动手做的实验</h3>
 
   <ul class="list">
     <li>换更激进的位置编码（NTK-aware RoPE / ALiBi）。</li>
-    <li>把 GQA 换成 MQA，对比 KV 内存与质量。</li>
+    <li>把 GQA 换成 MQA，对比 KV 内存和质量。</li>
     <li>对一个小 base 模型用 LoRA 做 SFT，研究参数效率。</li>
-    <li>把 RL 阶段换成可验证的 code reward (HumanEval)。</li>
-    <li>用 transformer-circuits 风格的工具去看 attention head 学到了什么。</li>
+    <li>把 RL 阶段换成可验证的 code reward（HumanEval）。</li>
+    <li>用 transformer-circuits 风格的工具去看 attention head 到底学到了什么。</li>
   </ul>
 
   <h3 class="section"><span class="sec-num">13.4</span>给 CV 读者的最后一句话</h3>
 
-  <p>2012 年 AlexNet 之后，CV 领域走了大约 10 年：从 ResNet 到 Detection / Segmentation 到 ViT 到 SAM 这条线，你应该都经历过。LLM 现在差不多在"2014 ~ 2016 之间"——主干网络已经收敛、Scaling 还在跑、agentic 时代刚开始。也就是说，<em>你正好赶在了一个真正激动人心的早期窗口里入门</em>。</p>
+  <p>2012 年 AlexNet 之后，CV 走了差不多 10 年：从 ResNet 到 Detection / Segmentation 再到 ViT、SAM 这条线，你应该都经历过。LLM 现在大概在"2014 ~ 2016 之间"——主干网络已经收敛，Scaling 还在跑，agentic 时代刚刚开始。换句话说，<em>你正好赶上了一个真正激动人心的早期窗口</em>。</p>
 
-  <p>nanochat 是你这趟旅程的起点。读懂它，把每一段类比、每一个零件、每一个 trade-off 都内化下来，然后去读真模型的论文 / 真公司的开源代码 / 真前沿的研究。剩下的，就是写代码、跑实验、读论文——和当年在 CV 里做的事一模一样。</p>
+  <p>nanochat 是这趟旅程的起点。读懂它，把每一段类比、每一个零件、每一个 trade-off 都内化下来，然后去啃真模型的论文、读真公司的开源代码、追真前沿的研究。剩下的，就是写代码、跑实验、读论文——和当年在 CV 里做的事一模一样。</p>
 
   <div class="pullquote">The architecture is just a Transformer. The interesting things are everywhere else.</div>
 
